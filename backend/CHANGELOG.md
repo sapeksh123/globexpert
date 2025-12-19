@@ -4,3 +4,4 @@ Backend improvement 3
 Maintenance update 1
 Performance tweak 1
 Documentation update 1
+Security update 1
