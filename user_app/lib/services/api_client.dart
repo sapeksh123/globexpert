@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -39,6 +40,8 @@ class ApiClient {
       return _parse(response);
     } on SocketException {
       throw Exception('Network error: unable to reach backend. Check host/port and internet connection.');
+    } on TimeoutException {
+      throw Exception('Request timeout. Server took too long to respond.');
     } on HttpException {
       throw Exception('HTTP error while contacting backend.');
     } on FormatException {
@@ -58,6 +61,8 @@ class ApiClient {
       return _parse(response);
     } on SocketException {
       throw Exception('Network error: unable to reach backend. Check host/port and internet connection.');
+    } on TimeoutException {
+      throw Exception('Request timeout. Server took too long to respond.');
     } on HttpException {
       throw Exception('HTTP error while contacting backend.');
     } on FormatException {
