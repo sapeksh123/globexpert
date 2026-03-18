@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/toast_extension.dart';
+import '../../utils/validators.dart';
 import 'auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -89,38 +90,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: _nameController,
                             decoration: const InputDecoration(labelText: 'Name'),
-                            validator: (value) {
-                              if (!_isRegisterMode) return null;
-                              if (value == null || value.trim().length < 2) {
-                                return 'Enter at least 2 characters';
-                              }
-                              return null;
-                            },
+                            validator: _isRegisterMode ? Validators.validateName : null,
                           ),
                         if (_isRegisterMode) const SizedBox(height: 12),
                         TextFormField(
                           controller: _emailController,
                           decoration: const InputDecoration(labelText: 'Email'),
                           keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            final email = value?.trim() ?? '';
-                            if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
-                              return 'Enter a valid email';
-                            }
-                            return null;
-                          },
+                          validator: Validators.validateEmail,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: true,
                           decoration: const InputDecoration(labelText: 'Password'),
-                          validator: (value) {
-                            if ((value ?? '').length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
+                          validator: (value) => Validators.validatePassword(value, isRegister: _isRegisterMode),
                         ),
                       ],
                     ),
