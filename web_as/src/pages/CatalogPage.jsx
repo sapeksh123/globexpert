@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import DataTable from "../components/ui/DataTable";
-import { createCatalogItem, deleteCatalogItem, fetchCatalogRows } from "../services/dashboardApi";
+import { useToast } from "../context/ToastContext";
+import { createCatalogItem, deleteCatalogItem, fetchCatalogRows, updateCatalogItem } from "../services/dashboardApi";
 
 const columns = [
   { key: "title", label: "Title" },
@@ -17,8 +18,10 @@ export default function CatalogPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editingItem, setEditingItem] = useState(null);
   const [form, setForm] = useState({ title: "", type: "PRODUCT", category: "", price: "", stock: "0" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
 
   const loadRows = async () => {
     setIsLoading(true);
@@ -64,20 +67,40 @@ export default function CatalogPage() {
   const tableRows = rows.map((row) => ({
     ...row,
     actions: (
-      <button
-        type="button"
-        onClick={async () => {
-          try {
-            await deleteCatalogItem({ type: row.type, id: row.id });
-            await loadRows();
-          } catch (err) {
-            setError(err.response?.data?.message || "Failed to delete item");
-          }
-        }}
-        className="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-700"
-      >
-        Delete
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await deleteCatalogItem({ type: row.type, id: row.id });
+              await loadRows();
+              showToast("Catalog item deleted", "success");
+            } catch (err) {
+              setError(err.response?.data?.message || "Failed to delete item");
+              showToast("Delete action failed", "error");
+            }
+          }}
+          className="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-700"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setEditingItem({
+              id: row.id,
+              title: row.title,
+              type: row.type,
+              category: row.category,
+              price: String(row.priceValue),
+              stock: String(row.stockValue ?? 0),
+            });
+          }}
+          className="rounded-lg border border-sky-200 px-2 py-1 text-xs text-sky-700"
+        >
+          Edit
+        </button>
+      </div>
     ),
   }));
 
@@ -91,8 +114,29 @@ export default function CatalogPage() {
       await createCatalogItem(form);
       setForm({ title: "", type: "PRODUCT", category: "", price: "", stock: "0" });
       await loadRows();
+      showToast("Catalog item added", "success");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create catalog item");
+      showToast("Create action failed", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const onUpdate = async (event) => {
+    event.preventDefault();
+    if (!editingItem) return;
+
+    setIsSubmitting(true);
+    setError("");
+    try {
+      await updateCatalogItem(editingItem);
+      setEditingItem(null);
+      await loadRows();
+      showToast("Catalog item updated", "success");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update catalog item");
+      showToast("Update action failed", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -168,6 +212,58 @@ export default function CatalogPage() {
             {isSubmitting ? "Adding..." : "Add"}
           </button>
         </form>
+
+        {editingItem ? (
+          <form onSubmit={onUpdate} className="mt-3 grid gap-2 rounded-xl border border-sky-100 bg-sky-50 p-3 md:grid-cols-6">
+            <input
+              value={editingItem.title}
+              onChange={(event) => setEditingItem((prev) => ({ ...prev, title: event.target.value }))}
+              placeholder="Title"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              required
+            />
+            <input
+              value={editingItem.category}
+              onChange={(event) => setEditingItem((prev) => ({ ...prev, category: event.target.value }))}
+              placeholder="Category"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              required
+            />
+            <input
+              value={editingItem.price}
+              onChange={(event) => setEditingItem((prev) => ({ ...prev, price: event.target.value }))}
+              placeholder="Price"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+            />
+            <input
+              value={editingItem.stock}
+              onChange={(event) => setEditingItem((prev) => ({ ...prev, stock: event.target.value }))}
+              placeholder="Stock"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              type="number"
+              min="0"
+              disabled={editingItem.type === "SERVICE"}
+            />
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-xl bg-sky-700 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditingItem(null)}
+              className="rounded-xl border border-slate-300 px-3 py-2 text-sm"
+            >
+              Cancel
+            </button>
+          </form>
+        ) : null}
       </div>
 
       {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}

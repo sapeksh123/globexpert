@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import DataTable from "../components/ui/DataTable";
+import { useToast } from "../context/ToastContext";
 import { fetchUsersRows, updateUserStatus } from "../services/dashboardApi";
 
 const columns = [
@@ -17,6 +18,7 @@ export default function UsersPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     let active = true;
@@ -60,8 +62,10 @@ export default function UsersPage() {
           try {
             await updateUserStatus(row.id, !row.isActive);
             await reload();
+            showToast(`User ${row.isActive ? "deactivated" : "activated"}`, "success");
           } catch (err) {
             setError(err.response?.data?.message || "Failed to update user status");
+            showToast("User status update failed", "error");
           }
         }}
         className={`rounded-lg border px-2 py-1 text-xs ${

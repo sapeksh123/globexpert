@@ -43,6 +43,7 @@ export async function fetchCatalogRows({ search = "", page = 1, limit = 10 }) {
     category: item.category,
     priceValue: Number(item.price || 0),
     price: `$${Number(item.price || 0).toFixed(2)}`,
+    stockValue: Number(item.stock || 0),
     status: item.isActive ? "Active" : "Inactive",
   }));
 
@@ -53,6 +54,7 @@ export async function fetchCatalogRows({ search = "", page = 1, limit = 10 }) {
     category: item.category,
     priceValue: Number(item.price || 0),
     price: `$${Number(item.price || 0).toFixed(2)}`,
+    stockValue: 0,
     status: item.isActive ? "Active" : "Inactive",
   }));
 
@@ -122,6 +124,25 @@ export async function createCatalogItem({ type, title, category, price, stock })
     price: Number(price),
     durationMinutes: 30,
     description: "",
+  });
+}
+
+export async function updateCatalogItem({ id, type, title, category, price, stock }) {
+  if (type === "PRODUCT") {
+    await apiClient.put(`/products/${id}`, {
+      title,
+      category,
+      price: Number(price),
+      stock: Number(stock || 0),
+    });
+    return;
+  }
+
+  await apiClient.put(`/services/${id}`, {
+    title,
+    category,
+    price: Number(price),
+    durationMinutes: 30,
   });
 }
 

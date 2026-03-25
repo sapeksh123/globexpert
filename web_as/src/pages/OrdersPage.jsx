@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import DataTable from "../components/ui/DataTable";
+import { useToast } from "../context/ToastContext";
 import { fetchOrderRows, updateOrderStatus } from "../services/dashboardApi";
 
 const columns = [
@@ -17,6 +18,7 @@ export default function OrdersPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     let active = true;
@@ -58,8 +60,10 @@ export default function OrdersPage() {
                 const result = await fetchOrderRows({ status, page: 1, limit: 10 });
                 setRows(result.rows);
                 setTotal(result.total);
+                showToast("Order moved to PROCESSING", "success");
               } catch (err) {
                 setError(err.response?.data?.message || "Status update failed");
+                showToast("Status update failed", "error");
               }
             }}
             className="rounded-lg border border-amber-200 px-2 py-1 text-xs text-amber-700"
@@ -76,8 +80,10 @@ export default function OrdersPage() {
                 const result = await fetchOrderRows({ status, page: 1, limit: 10 });
                 setRows(result.rows);
                 setTotal(result.total);
+                showToast("Order moved to DELIVERED", "success");
               } catch (err) {
                 setError(err.response?.data?.message || "Status update failed");
+                showToast("Status update failed", "error");
               }
             }}
             className="rounded-lg border border-emerald-200 px-2 py-1 text-xs text-emerald-700"

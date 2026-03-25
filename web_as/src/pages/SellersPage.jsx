@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import DataTable from "../components/ui/DataTable";
+import { useToast } from "../context/ToastContext";
 import { fetchSellersRows, updateSellerStatus } from "../services/dashboardApi";
 
 const columns = [
@@ -16,6 +17,7 @@ export default function SellersPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     let active = true;
@@ -62,8 +64,10 @@ export default function SellersPage() {
             try {
               await updateSellerStatus(row.id, "APPROVED");
               await reload();
+              showToast("Seller approved", "success");
             } catch (err) {
               setError(err.response?.data?.message || "Failed to approve seller");
+              showToast("Approve action failed", "error");
             }
           }}
           className="rounded-lg border border-emerald-200 px-2 py-1 text-xs text-emerald-700"
@@ -76,8 +80,10 @@ export default function SellersPage() {
             try {
               await updateSellerStatus(row.id, "REJECTED");
               await reload();
+              showToast("Seller rejected", "success");
             } catch (err) {
               setError(err.response?.data?.message || "Failed to reject seller");
+              showToast("Reject action failed", "error");
             }
           }}
           className="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-700"
