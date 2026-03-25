@@ -1,9 +1,45 @@
-import React from 'react'
+import { Navigate, Route, Routes } from "react-router-dom";
+import DashboardLayout from "./components/layout/DashboardLayout";
+import { useAuth } from "./context/AuthContext";
+import CatalogPage from "./pages/CatalogPage";
+import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import OrdersPage from "./pages/OrdersPage";
+import UsersPage from "./pages/UsersPage";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <div className='bg-teal-900 text-white p-4'>App</div>
-  )
+    <Routes>
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute roles={["ADMIN", "SELLER"]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="catalog" element={<CatalogPage />} />
+        <Route path="orders" element={<OrdersPage />} />
+        <Route
+          path="users"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;

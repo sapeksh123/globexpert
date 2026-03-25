@@ -35,9 +35,10 @@ class ApiConfig {
   // ---------------------------------------------------------------------------
   // Endpoints
   // ---------------------------------------------------------------------------
-  static String get authUrl => '$baseUrl/auth';
-  static String get usersUrl => '$baseUrl/users';
-  static String get accountsUrl => '$baseUrl/accounts';
-  static String get locationsUrl => '$baseUrl/locations';
-  static String get teleadminUrl => '$baseUrl/teleadmin';
+  static String get authUrl => '$baseUrl/api/auth';
+  static String get usersUrl => '$baseUrl/api/users';
+  static String get sellersUrl => '$baseUrl/api/sellers';
+  static String get productsUrl => '$baseUrl/api/products';
+  static String get servicesUrl => '$baseUrl/api/services';
+  static String get ordersUrl => '$baseUrl/api/orders';
 }

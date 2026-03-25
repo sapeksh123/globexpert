@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+:root {
+	--brand-navy: #0e1b32;
+	--brand-navy-2: #16325f;
+	--brand-teal: #1f8a70;
+	--brand-sand: #f4e7d2;
+}
+
+html,
+body,
+#root {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: "Segoe UI", "Trebuchet MS", "Verdana", sans-serif;
+	color: #0f172a;
+	background: #f8fafc;
+}
