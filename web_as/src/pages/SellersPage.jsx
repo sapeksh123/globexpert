@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
 import DataTable from "../components/ui/DataTable";
 import { useToast } from "../context/ToastContext";
-import { fetchSellersRows, updateSellerStatus } from "../services/dashboardApi";
+import { createSellerByAdmin, fetchSellersRows, updateSellerStatus, updateUserStatus } from "../services/dashboardApi";
 
 const columns = [
   { key: "businessName", label: "Business" },
   { key: "owner", label: "Owner" },
   { key: "email", label: "Email" },
   { key: "status", label: "Status" },
+  { key: "active", label: "Active" },
   { key: "actions", label: "Actions" },
 ];
+
+const initialSellerForm = {
+  name: "",
+  email: "",
+  password: "",
+  businessName: "",
+  businessDescription: "",
+};
 
 export default function SellersPage() {
   const [status, setStatus] = useState("");
@@ -18,6 +27,9 @@ export default function SellersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionKey, setActionKey] = useState("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [sellerForm, setSellerForm] = useState(initialSellerForm);
+  const [isCreating, setIsCreating] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -58,7 +70,7 @@ export default function SellersPage() {
   const tableRows = rows.map((row) => ({
     ...row,
     actions: (
-      <div className="flex gap-1">
+      <div className="flex flex-wrap gap-1">
         <button
           type="button"
           disabled={Boolean(actionKey)}
@@ -99,9 +111,73 @@ export default function SellersPage() {
         >
           {actionKey === `reject-${row.id}` ? "Saving..." : "Reject"}
         </button>
+        <button
+          type="button"
+          disabled={Boolean(actionKey)}
+          onClick={async () => {
+            if (!row.userId) return;
+            setActionKey(`active-${row.id}`);
+            try {
+              await updateUserStatus(row.userId, !row.userActive);
+              await reload();
+              showToast(`Seller ${row.userActive ? "deactivated" : "activated"}`, "success");
+            } catch (err) {
+              setError(err.response?.data?.message || "Failed to update seller active status");
+              showToast("Seller status update failed", "error");
+            } finally {
+              setActionKey("");
+            }
+          }}
+          className={`rounded-lg border px-2 py-1 text-xs ${
+            row.userActive ? "border-rose-200 text-rose-700" : "border-emerald-200 text-emerald-700"
+          }`}
+        >
+          {actionKey === `active-${row.id}` ? "Saving..." : row.userActive ? "Deactivate" : "Activate"}
+        </button>
       </div>
     ),
   }));
+
+  const onCreateSeller = async (event) => {
+    event.preventDefault();
+    setError("");
+
+    if (sellerForm.name.trim().length < 2 || sellerForm.businessName.trim().length < 2) {
+      setError("Name and business name must be at least 2 characters");
+      return;
+    }
+
+    if (!sellerForm.email.includes("@")) {
+      setError("Please enter a valid email");
+      return;
+    }
+
+    if (sellerForm.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      await createSellerByAdmin({
+        name: sellerForm.name.trim(),
+        email: sellerForm.email.trim(),
+        password: sellerForm.password,
+        businessName: sellerForm.businessName.trim(),
+        businessDescription: sellerForm.businessDescription.trim(),
+      });
+      showToast("Seller created and approved", "success");
+      setSellerForm(initialSellerForm);
+      setIsCreateOpen(false);
+      await reload();
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to create seller";
+      setError(message);
+      showToast(message, "error");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <section className="space-y-4">
@@ -119,8 +195,68 @@ export default function SellersPage() {
             <option value="APPROVED">APPROVED</option>
             <option value="REJECTED">REJECTED</option>
           </select>
-          <p className="text-xs text-slate-500">Total sellers: {total}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-slate-500">Total sellers: {total}</p>
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen((prev) => !prev)}
+              className="rounded-xl bg-[#0e1b32] px-3 py-2 text-xs font-medium text-white"
+            >
+              {isCreateOpen ? "Close" : "Create Seller"}
+            </button>
+          </div>
         </div>
+
+        {isCreateOpen ? (
+          <form onSubmit={onCreateSeller} className="mt-4 grid gap-2 sm:grid-cols-2">
+            <input
+              placeholder="Seller name"
+              value={sellerForm.name}
+              onChange={(event) => setSellerForm((prev) => ({ ...prev, name: event.target.value }))}
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              required
+            />
+            <input
+              placeholder="Seller email"
+              type="email"
+              value={sellerForm.email}
+              onChange={(event) => setSellerForm((prev) => ({ ...prev, email: event.target.value }))}
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              required
+            />
+            <input
+              placeholder="Temporary password"
+              type="password"
+              value={sellerForm.password}
+              onChange={(event) => setSellerForm((prev) => ({ ...prev, password: event.target.value }))}
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              required
+            />
+            <input
+              placeholder="Business name"
+              value={sellerForm.businessName}
+              onChange={(event) => setSellerForm((prev) => ({ ...prev, businessName: event.target.value }))}
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              required
+            />
+            <textarea
+              placeholder="Business description"
+              value={sellerForm.businessDescription}
+              onChange={(event) => setSellerForm((prev) => ({ ...prev, businessDescription: event.target.value }))}
+              className="rounded-xl border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
+              rows={3}
+            />
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                disabled={isCreating}
+                className="rounded-xl bg-[#0e1b32] px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {isCreating ? "Creating..." : "Create and Approve Seller"}
+              </button>
+            </div>
+          </form>
+        ) : null}
       </div>
 
       {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}

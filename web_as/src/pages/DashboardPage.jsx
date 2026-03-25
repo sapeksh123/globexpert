@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { LuBox, LuDollarSign, LuPackageSearch, LuWrench } from "react-icons/lu";
+import { LuBox, LuCheckCheck, LuClock3, LuDollarSign, LuPackageSearch, LuUsers, LuWrench } from "react-icons/lu";
 import StatCard from "../components/ui/StatCard";
 import { useAuth } from "../context/AuthContext";
-import { fetchSellerDashboardAnalytics } from "../services/dashboardApi";
+import { fetchAdminDashboardAnalytics, fetchSellerDashboardAnalytics } from "../services/dashboardApi";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
@@ -24,6 +25,11 @@ export default function DashboardPage() {
       DELIVERED: 0,
     },
     trendByDay: [],
+    orderStatusBreakdown: {
+      CONFIRMED: 0,
+      PROCESSING: 0,
+      DELIVERED: 0,
+    },
   });
 
   useEffect(() => {
@@ -33,12 +39,14 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError("");
       try {
-        const data = await fetchSellerDashboardAnalytics({
-          userId: user?._id,
-          status,
-          fromDate,
-          toDate,
-        });
+        const data = isAdmin
+          ? await fetchAdminDashboardAnalytics()
+          : await fetchSellerDashboardAnalytics({
+              userId: user?._id,
+              status,
+              fromDate,
+              toDate,
+            });
         if (active) {
           setStatsData(data);
         }
@@ -57,12 +65,12 @@ export default function DashboardPage() {
     return () => {
       active = false;
     };
-  }, [user?._id, status, fromDate, toDate]);
+  }, [isAdmin, user?._id, status, fromDate, toDate]);
 
   const maxOrders = Math.max(...statsData.trendByDay.map((item) => item.orders), 1);
   const maxRevenue = Math.max(...statsData.trendByDay.map((item) => item.revenue), 1);
 
-  const stats = useMemo(
+  const sellerStats = useMemo(
     () => [
       {
         title: "Orders",
@@ -92,10 +100,119 @@ export default function DashboardPage() {
     [statsData]
   );
 
-  return (
-    <section className="space-y-4">
-      {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
+  const adminStats = useMemo(
+    () => [
+      {
+        title: "Total Users",
+        value: String(statsData.kpis.totalUsers || 0),
+        hint: "All customers and panel users",
+        icon: LuUsers,
+      },
+      {
+        title: "Pending Sellers",
+        value: String(statsData.kpis.pendingSellers || 0),
+        hint: "Need admin review",
+        icon: LuClock3,
+      },
+      {
+        title: "Approved Sellers",
+        value: String(statsData.kpis.approvedSellers || 0),
+        hint: "Can access seller panel",
+        icon: LuCheckCheck,
+      },
+      {
+        title: "Total Orders",
+        value: String(statsData.kpis.totalOrders || 0),
+        hint: "Platform orders",
+        icon: LuPackageSearch,
+      },
+    ],
+    [statsData]
+  );
 
+  const renderAdminDashboard = () => {
+    const userTotal = Math.max(Number(statsData.kpis.totalUsers || 0), 1);
+    const activeWidth = Math.round((Number(statsData.kpis.activeUsers || 0) / userTotal) * 100);
+    const inactiveWidth = Math.round((Number(statsData.kpis.inactiveUsers || 0) / userTotal) * 100);
+    const sellerTotal = Math.max(Number(statsData.kpis.totalSellers || 0), 1);
+
+    return (
+      <>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" aria-busy={isLoading}>
+          {adminStats.map((item) => (
+            <StatCard key={item.title} {...item} />
+          ))}
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <h3 className="text-base font-semibold text-slate-900 sm:text-lg">Seller Approval Pipeline</h3>
+            <div className="mt-4 space-y-3 text-sm">
+              {[
+                ["PENDING", Number(statsData.kpis.pendingSellers || 0)],
+                ["APPROVED", Number(statsData.kpis.approvedSellers || 0)],
+                ["REJECTED", Number(statsData.kpis.rejectedSellers || 0)],
+              ].map(([label, value]) => {
+                const width = Math.round((value / sellerTotal) * 100);
+                return (
+                  <div key={label}>
+                    <div className="mb-1 flex items-center justify-between text-slate-600">
+                      <span>{label}</span>
+                      <span>{value}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100">
+                      <div className="h-2 rounded-full bg-indigo-500" style={{ width: `${width}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <h3 className="text-base font-semibold text-slate-900 sm:text-lg">User Activation Overview</h3>
+            <div className="mt-4 space-y-3 text-sm">
+              {[
+                ["ACTIVE", Number(statsData.kpis.activeUsers || 0), activeWidth],
+                ["INACTIVE", Number(statsData.kpis.inactiveUsers || 0), inactiveWidth],
+              ].map(([label, value, width]) => (
+                <div key={label}>
+                  <div className="mb-1 flex items-center justify-between text-slate-600">
+                    <span>{label}</span>
+                    <span>{value}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-100">
+                    <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${width}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <h3 className="text-base font-semibold text-slate-900 sm:text-lg">Catalog Capacity</h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-xl bg-slate-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Products</p>
+              <p className="mt-1 text-xl font-semibold text-slate-900">{statsData.kpis.totalProducts || 0}</p>
+            </div>
+            <div className="rounded-xl bg-slate-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Services</p>
+              <p className="mt-1 text-xl font-semibold text-slate-900">{statsData.kpis.totalServices || 0}</p>
+            </div>
+            <div className="rounded-xl bg-slate-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Sellers</p>
+              <p className="mt-1 text-xl font-semibold text-slate-900">{statsData.kpis.totalSellers || 0}</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  const renderSellerDashboard = () => (
+    <>
       <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <select
@@ -138,7 +255,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" aria-busy={isLoading}>
-        {stats.map((item) => (
+        {sellerStats.map((item) => (
           <StatCard key={item.title} {...item} />
         ))}
       </div>
@@ -201,6 +318,14 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <section className="space-y-4">
+      {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
+
+      {isAdmin ? renderAdminDashboard() : renderSellerDashboard()}
     </section>
   );
 }

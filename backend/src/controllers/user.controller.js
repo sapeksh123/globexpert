@@ -28,8 +28,18 @@ const updateUserStatus = async (req, res, next) => {
   }
 };
 
+const createUserByAdmin = async (req, res, next) => {
+  try {
+    const user = await UserService.createUserByAdmin(req.body);
+    return sendSuccess(res, 201, "User created", user);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   listUsers,
   getUserById,
   updateUserStatus,
+  createUserByAdmin,
 };

@@ -12,8 +12,8 @@ const validateRegisterPayload = (payload) => {
 	if (!payload.password || payload.password.length < 6) {
 		errors.push("Password must be at least 6 characters");
 	}
-	if (payload.role && !["ADMIN", "SELLER", "USER"].includes(payload.role)) {
-		errors.push("Role must be one of ADMIN, SELLER, USER");
+	if (payload.role && payload.role !== "USER") {
+		errors.push("Self registration supports USER role only");
 	}
 
 	return errors;

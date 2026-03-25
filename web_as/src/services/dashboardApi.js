@@ -98,6 +98,68 @@ export async function fetchSellerDashboardAnalytics({ userId, status = "", fromD
   };
 }
 
+export async function fetchAdminDashboardAnalytics() {
+  const [
+    usersAll,
+    usersActive,
+    usersInactive,
+    sellersAll,
+    sellersPending,
+    sellersApproved,
+    sellersRejected,
+    products,
+    services,
+    ordersMeta,
+    firstOrders,
+  ] = await Promise.all([
+    apiClient.get("/users?limit=1"),
+    apiClient.get("/users?limit=1&isActive=true"),
+    apiClient.get("/users?limit=1&isActive=false"),
+    apiClient.get("/sellers"),
+    apiClient.get("/sellers?status=PENDING"),
+    apiClient.get("/sellers?status=APPROVED"),
+    apiClient.get("/sellers?status=REJECTED"),
+    apiClient.get("/products?limit=1"),
+    apiClient.get("/services?limit=1"),
+    apiClient.get("/orders?limit=1"),
+    apiClient.get("/orders?page=1&limit=100"),
+  ]);
+
+  const ordersRows = firstOrders.data?.data ?? [];
+  const statusBreakdown = {
+    CONFIRMED: 0,
+    PROCESSING: 0,
+    DELIVERED: 0,
+  };
+
+  ordersRows.forEach((row) => {
+    if (statusBreakdown[row.status] !== undefined) {
+      statusBreakdown[row.status] += 1;
+    }
+  });
+
+  const usersTotal = Number(usersAll.data?.meta?.total || 0);
+  const usersActiveTotal = Number(usersActive.data?.meta?.total || 0);
+  const usersInactiveTotal = Number(usersInactive.data?.meta?.total || 0);
+  const sellersTotal = (sellersAll.data?.data ?? []).length;
+
+  return {
+    kpis: {
+      totalUsers: usersTotal,
+      activeUsers: usersActiveTotal,
+      inactiveUsers: usersInactiveTotal,
+      totalSellers: sellersTotal,
+      pendingSellers: (sellersPending.data?.data ?? []).length,
+      approvedSellers: (sellersApproved.data?.data ?? []).length,
+      rejectedSellers: (sellersRejected.data?.data ?? []).length,
+      totalProducts: Number(products.data?.meta?.total || 0),
+      totalServices: Number(services.data?.meta?.total || 0),
+      totalOrders: Number(ordersMeta.data?.meta?.total || 0),
+    },
+    orderStatusBreakdown: statusBreakdown,
+  };
+}
+
 export async function fetchCatalogRows({ search = "", page = 1, limit = 20, status = "", category = "" }) {
   const query = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (search.trim()) {
@@ -193,6 +255,18 @@ export async function updateUserStatus(userId, isActive) {
   await apiClient.patch(`/users/${userId}/status`, { isActive });
 }
 
+export async function createUserByAdmin({ name, email, password, phone = "", address = "", isActive = true }) {
+  await apiClient.post("/users", {
+    name,
+    email,
+    password,
+    phone,
+    address,
+    role: "USER",
+    isActive,
+  });
+}
+
 export async function createCatalogItem({ type, title, category, description, price, stock, durationMinutes, isActive }) {
   const payload = new FormData();
   payload.append("title", title);
@@ -260,9 +334,13 @@ export async function fetchSellersRows({ status = "", page = 1, limit = 20 }) {
   const response = await apiClient.get(`/sellers?${query.toString()}`);
   const rows = (response.data?.data ?? []).map((seller) => ({
     id: seller._id,
+    userId: seller.user?._id,
     businessName: seller.businessName,
+    businessDescription: seller.businessDescription || "",
     owner: seller.user?.name ?? "-",
     email: seller.user?.email ?? "-",
+    userActive: Boolean(seller.user?.isActive),
+    active: seller.user?.isActive ? "Active" : "Inactive",
     status: seller.status,
   }));
 
@@ -271,4 +349,56 @@ export async function fetchSellersRows({ status = "", page = 1, limit = 20 }) {
 
 export async function updateSellerStatus(sellerId, status) {
   await apiClient.patch(`/sellers/${sellerId}/status`, { status });
+}
+
+export async function createSellerByAdmin({
+  name,
+  email,
+  password,
+  businessName,
+  businessDescription = "",
+  phone = "",
+  address = "",
+}) {
+  await apiClient.post("/sellers/admin-create", {
+    name,
+    email,
+    password,
+    businessName,
+    businessDescription,
+    phone,
+    address,
+  });
+}
+
+export async function registerSellerFromWeb({ name, email, password, businessName, businessDescription = "" }) {
+  await apiClient.post("/auth/register", {
+    name,
+    email,
+    password,
+    role: "USER",
+  });
+
+  const loginResponse = await apiClient.post("/auth/login", { email, password });
+  const token = loginResponse.data?.data?.token;
+
+  if (!token) {
+    throw new Error("Unable to authenticate after registration");
+  }
+
+  const previousAuth = apiClient.defaults.headers.common.Authorization;
+  apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
+
+  try {
+    await apiClient.post("/sellers/request", {
+      businessName,
+      businessDescription,
+    });
+  } finally {
+    if (previousAuth) {
+      apiClient.defaults.headers.common.Authorization = previousAuth;
+    } else {
+      delete apiClient.defaults.headers.common.Authorization;
+    }
+  }
 }

@@ -16,6 +16,12 @@ const signToken = (user) => {
 };
 
 const register = async (payload) => {
+	if (payload.role && payload.role !== "USER") {
+		const error = new Error("Self registration supports USER role only");
+		error.statusCode = 403;
+		throw error;
+	}
+
 	const existingUser = await User.findOne({ email: payload.email.toLowerCase() });
 	if (existingUser) {
 		const error = new Error("Email already registered");
@@ -31,16 +37,8 @@ const register = async (payload) => {
 		password: passwordHash,
 		phone: payload.phone || "",
 		address: payload.address || "",
-		role: payload.role || "USER",
+		role: "USER",
 	});
-
-	if (user.role === "SELLER") {
-		await Seller.create({
-			user: user._id,
-			businessName: payload.businessName || `${user.name}'s Store`,
-			businessDescription: payload.businessDescription || "",
-		});
-	}
 
 	const token = signToken(user);
 	const safeUser = await User.findById(user._id).select("-password");
@@ -67,6 +65,15 @@ const login = async (payload) => {
 		const error = new Error("User account is inactive");
 		error.statusCode = 403;
 		throw error;
+	}
+
+	if (user.role === "SELLER") {
+		const seller = await Seller.findOne({ user: user._id });
+		if (!seller || seller.status !== "APPROVED") {
+			const error = new Error("your account is not approved please contact to admin");
+			error.statusCode = 403;
+			throw error;
+		}
 	}
 
 	const token = signToken(user);

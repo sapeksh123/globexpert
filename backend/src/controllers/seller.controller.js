@@ -1,5 +1,6 @@
 const Seller = require("../models/Seller");
 const User = require("../models/User");
+const bcrypt = require("bcrypt");
 const { sendSuccess } = require("../utils/response");
 
 const createSellerRequest = async (req, res, next) => {
@@ -92,9 +93,65 @@ const updateSellerStatus = async (req, res, next) => {
 	}
 };
 
+const createSellerByAdmin = async (req, res, next) => {
+	try {
+		const name = String(req.body.name || "").trim();
+		const email = String(req.body.email || "").toLowerCase().trim();
+		const password = String(req.body.password || "");
+		const businessName = String(req.body.businessName || "").trim();
+
+		if (name.length < 2) {
+			return res.status(400).json({ success: false, message: "Name must be at least 2 characters" });
+		}
+
+		if (!/\S+@\S+\.\S+/.test(email)) {
+			return res.status(400).json({ success: false, message: "Valid email is required" });
+		}
+
+		if (password.length < 6) {
+			return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+		}
+
+		if (businessName.length < 2) {
+			return res.status(400).json({ success: false, message: "businessName is required and must be at least 2 characters" });
+		}
+
+		const existingUser = await User.findOne({ email });
+		if (existingUser) {
+			return res.status(409).json({ success: false, message: "Email already registered" });
+		}
+
+		const passwordHash = await bcrypt.hash(password, 10);
+
+		const user = await User.create({
+			name,
+			email,
+			password: passwordHash,
+			phone: req.body.phone || "",
+			address: req.body.address || "",
+			role: "SELLER",
+			isActive: true,
+		});
+
+		const seller = await Seller.create({
+			user: user._id,
+			businessName,
+			businessDescription: req.body.businessDescription || "",
+			status: "APPROVED",
+		});
+
+		const populated = await Seller.findById(seller._id).populate("user", "name email role isActive");
+
+		return sendSuccess(res, 201, "Seller created", populated);
+	} catch (error) {
+		next(error);
+	}
+};
+
 module.exports = {
 	createSellerRequest,
 	listSellers,
 	getMySellerProfile,
 	updateSellerStatus,
+	createSellerByAdmin,
 };

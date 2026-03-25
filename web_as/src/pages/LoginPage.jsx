@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 
@@ -19,12 +19,16 @@ export default function LoginPage() {
 
   const getErrorMessage = (err) => {
     const status = err?.response?.status;
+    const responseMessage = String(err?.response?.data?.message || "");
 
     if (status === 401 || status === 400) {
       return "Invalid credentials";
     }
 
     if (status === 403) {
+      if (responseMessage.toLowerCase().includes("not approved")) {
+        return "your account is not approved please contact to admin";
+      }
       return "Your account is inactive. Please contact support.";
     }
 
@@ -32,7 +36,7 @@ export default function LoginPage() {
     if (Array.isArray(errors) && errors.length > 0) {
       return "Invalid credentials";
     }
-    return err?.response?.data?.message || err?.normalizedMessage || "Login failed";
+    return responseMessage || err?.normalizedMessage || "Login failed";
   };
 
   const handleSubmit = async (event) => {
@@ -119,6 +123,13 @@ export default function LoginPage() {
         >
           {isLoading ? "Signing in..." : "Sign in"}
         </button>
+
+        <p className="mt-3 text-center text-sm text-slate-600">
+          Want to become a seller?{" "}
+          <Link to="/register-seller" className="font-medium text-teal-700 hover:underline">
+            Register here
+          </Link>
+        </p>
       </form>
     </div>
   );

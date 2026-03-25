@@ -6,6 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import OrdersPage from "./pages/OrdersPage";
 import ProfilePage from "./pages/ProfilePage";
+import RegisterSellerPage from "./pages/RegisterSellerPage";
 import SellersPage from "./pages/SellersPage";
 import UsersPage from "./pages/UsersPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -19,6 +20,10 @@ function App() {
       <Route
         path="/login"
         element={isAuthenticated && isPanelUser ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/register-seller"
+        element={isAuthenticated && isPanelUser ? <Navigate to="/dashboard" replace /> : <RegisterSellerPage />}
       />
 
       <Route

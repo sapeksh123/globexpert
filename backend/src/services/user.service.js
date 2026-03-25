@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const bcrypt = require("bcrypt");
 
 const listUsers = async (query) => {
   const page = Math.max(Number(query.page) || 1, 1);
@@ -14,6 +15,9 @@ const listUsers = async (query) => {
       { name: { $regex: query.search, $options: "i" } },
       { email: { $regex: query.search, $options: "i" } },
     ];
+  }
+  if (query.isActive === "true" || query.isActive === "false") {
+    filter.isActive = query.isActive === "true";
   }
 
   const [items, total] = await Promise.all([
@@ -59,8 +63,62 @@ const updateUserStatus = async (userId, body) => {
   return user;
 };
 
+const createUserByAdmin = async (body) => {
+  const role = body.role || "USER";
+
+  if (role !== "USER") {
+    const error = new Error("Admin user creation supports USER role only");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const email = String(body.email || "").toLowerCase().trim();
+  const name = String(body.name || "").trim();
+  const password = String(body.password || "");
+
+  if (name.length < 2) {
+    const error = new Error("Name must be at least 2 characters");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    const error = new Error("Valid email is required");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (password.length < 6) {
+    const error = new Error("Password must be at least 6 characters");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const existing = await User.findOne({ email });
+  if (existing) {
+    const error = new Error("Email already registered");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const user = await User.create({
+    name,
+    email,
+    password: passwordHash,
+    phone: body.phone || "",
+    address: body.address || "",
+    role: "USER",
+    isActive: body.isActive === undefined ? true : Boolean(body.isActive),
+  });
+
+  return User.findById(user._id).select("-password");
+};
+
 module.exports = {
   listUsers,
   getUserById,
   updateUserStatus,
+  createUserByAdmin,
 };

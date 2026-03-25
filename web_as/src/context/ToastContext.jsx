@@ -65,7 +65,7 @@ export function ToastProvider({ children }) {
                       toast.onConfirm();
                     }
                   }}
-                  className="rounded-lg bg-[#0e1b32] px-2 py-1 text-xs text-white"
+                  className="rounded-lg bg-red-700 px-2 py-1 text-xs text-white"
                 >
                   Yes, logout
                 </button>

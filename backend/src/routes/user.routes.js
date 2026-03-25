@@ -5,6 +5,7 @@ const { authorize } = require("../middleware/role.middleware");
 
 const router = express.Router();
 
+router.post("/", authenticate, authorize("ADMIN"), userController.createUserByAdmin);
 router.get("/", authenticate, authorize("ADMIN"), userController.listUsers);
 router.get("/:id", authenticate, authorize("ADMIN"), userController.getUserById);
 router.patch("/:id/status", authenticate, authorize("ADMIN"), userController.updateUserStatus);
