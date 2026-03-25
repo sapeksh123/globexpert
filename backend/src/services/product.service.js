@@ -1,14 +1,29 @@
 const Product = require("../models/Product");
 const Service = require("../models/Service");
+const Seller = require("../models/Seller");
 
 const getModelByEntity = (entity) => {
 	if (entity === "service") return Service;
 	return Product;
 };
 
-const createEntity = async (entity, payload, sellerId) => {
+const ensureApprovedSeller = async (actor) => {
+	if (actor.role !== "SELLER") {
+		return;
+	}
+
+	const sellerProfile = await Seller.findOne({ user: actor._id });
+	if (!sellerProfile || sellerProfile.status !== "APPROVED") {
+		const error = new Error("Seller profile is not approved");
+		error.statusCode = 403;
+		throw error;
+	}
+};
+
+const createEntity = async (entity, payload, actor) => {
 	const Model = getModelByEntity(entity);
-	return Model.create({ ...payload, seller: sellerId });
+	await ensureApprovedSeller(actor);
+	return Model.create({ ...payload, seller: actor._id });
 };
 
 const listEntities = async (entity, query) => {

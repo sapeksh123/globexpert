@@ -16,7 +16,8 @@ class ProfileScreen extends StatelessWidget {
           child: ListTile(
             leading: const CircleAvatar(child: Icon(Icons.person)),
             title: Text(auth.name.isEmpty ? 'User' : auth.name),
-            subtitle: const Text('Manage your profile and session'),
+            subtitle: Text(auth.email.isEmpty ? 'Manage your profile and session' : auth.email),
+            trailing: Chip(label: Text(auth.role)),
           ),
         ),
         const SizedBox(height: 10),

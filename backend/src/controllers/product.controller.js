@@ -16,7 +16,7 @@ const createProduct = async (req, res, next) => {
 			payload.imageUrl = `/uploads/${req.file.filename}`;
 		}
 
-		const product = await ProductService.createEntity(ENTITY, payload, req.user._id);
+		const product = await ProductService.createEntity(ENTITY, payload, req.user);
 		return sendSuccess(res, 201, "Product created", product);
 	} catch (error) {
 		next(error);

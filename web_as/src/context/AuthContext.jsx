@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import apiClient from "../services/apiClient";
 
 const AuthContext = createContext(null);
@@ -25,6 +25,22 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("ge_user");
     setUser(null);
   };
+
+  useEffect(() => {
+    const restore = async () => {
+      const token = localStorage.getItem("ge_token");
+      if (!token) return;
+      try {
+        const response = await apiClient.get("/auth/me");
+        setUser(response.data?.data ?? null);
+        localStorage.setItem("ge_user", JSON.stringify(response.data?.data ?? null));
+      } catch (_error) {
+        logout();
+      }
+    };
+
+    restore();
+  }, []);
 
   const value = useMemo(
     () => ({

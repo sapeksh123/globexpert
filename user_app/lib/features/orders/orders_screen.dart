@@ -11,6 +11,39 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'DELIVERED':
+        return Colors.green;
+      case 'PROCESSING':
+        return Colors.orange;
+      default:
+        return Colors.blue;
+    }
+  }
+
+  int _statusStep(String status) {
+    switch (status) {
+      case 'DELIVERED':
+        return 3;
+      case 'PROCESSING':
+        return 2;
+      default:
+        return 1;
+    }
+  }
+
+  Widget _timelineDot(bool active, Color color) {
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: active ? color : Colors.grey.shade300,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -35,11 +68,42 @@ class _OrdersScreenState extends State<OrdersScreen> {
       itemCount: provider.orders.length,
       itemBuilder: (context, index) {
         final order = provider.orders[index];
+        final color = _statusColor(order.status);
+        final step = _statusStep(order.status);
+
         return Card(
           child: ListTile(
             title: Text(order.id),
-            subtitle: Text('Status: ${order.status}'),
-            trailing: Text('\$${order.subtotal.toStringAsFixed(2)}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Chip(
+                      backgroundColor: color.withValues(alpha: 0.12),
+                      label: Text(order.status, style: TextStyle(color: color)),
+                    ),
+                    Text('Placed: ${order.createdAt.toIso8601String().substring(0, 10)}'),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    _timelineDot(step >= 1, color),
+                    Expanded(child: Container(height: 2, color: step >= 2 ? color : Colors.grey.shade300)),
+                    _timelineDot(step >= 2, color),
+                    Expanded(child: Container(height: 2, color: step >= 3 ? color : Colors.grey.shade300)),
+                    _timelineDot(step >= 3, color),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                const Text('Confirmed  •  Processing  •  Delivered'),
+              ],
+            ),
+            trailing: Text('\$${order.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600)),
           ),
         );
       },

@@ -12,11 +12,14 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isAuthenticated = false;
   String _name = '';
+  String _email = '';
   String _role = 'USER';
 
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _isAuthenticated;
   String get name => _name;
+  String get email => _email;
+  String get role => _role;
 
   Future<void> restoreSession() async {
     final token = await _storageService.readToken();
@@ -30,6 +33,7 @@ class AuthProvider extends ChangeNotifier {
       final response = await _authService.me();
       final user = response['data'] as Map<String, dynamic>? ?? {};
       _name = user['name']?.toString() ?? '';
+      _email = user['email']?.toString() ?? '';
       _role = user['role']?.toString() ?? 'USER';
       _isAuthenticated = true;
     } catch (_) {
@@ -56,6 +60,7 @@ class AuthProvider extends ChangeNotifier {
 
       await _storageService.saveToken(token);
       _name = user['name']?.toString() ?? '';
+      _email = user['email']?.toString() ?? '';
       _role = user['role']?.toString() ?? 'USER';
       _isAuthenticated = true;
     } finally {
@@ -81,6 +86,7 @@ class AuthProvider extends ChangeNotifier {
     await _storageService.clearToken();
     _isAuthenticated = false;
     _name = '';
+    _email = '';
     _role = 'USER';
     notifyListeners();
   }

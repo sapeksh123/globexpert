@@ -1,8 +1,16 @@
 const Seller = require("../models/Seller");
+const User = require("../models/User");
 const { sendSuccess } = require("../utils/response");
 
 const createSellerRequest = async (req, res, next) => {
 	try {
+		if (!req.body.businessName || req.body.businessName.trim().length < 2) {
+			return res.status(400).json({
+				success: false,
+				message: "businessName is required and must be at least 2 characters",
+			});
+		}
+
 		const existing = await Seller.findOne({ user: req.user._id });
 		if (existing) {
 			return res.status(409).json({ success: false, message: "Seller profile already exists" });
@@ -68,6 +76,14 @@ const updateSellerStatus = async (req, res, next) => {
 
 		if (!seller) {
 			return res.status(404).json({ success: false, message: "Seller not found" });
+		}
+
+		if (status === "APPROVED") {
+			await User.findByIdAndUpdate(seller.user._id, { role: "SELLER" });
+		}
+
+		if (status === "REJECTED") {
+			await User.findByIdAndUpdate(seller.user._id, { role: "USER" });
 		}
 
 		return sendSuccess(res, 200, "Seller status updated", seller);

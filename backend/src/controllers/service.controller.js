@@ -16,7 +16,7 @@ const createService = async (req, res, next) => {
       payload.imageUrl = `/uploads/${req.file.filename}`;
     }
 
-    const service = await ProductService.createEntity(ENTITY, payload, req.user._id);
+    const service = await ProductService.createEntity(ENTITY, payload, req.user);
     return sendSuccess(res, 201, "Service created", service);
   } catch (error) {
     next(error);
