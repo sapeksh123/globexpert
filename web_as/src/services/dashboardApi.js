@@ -89,13 +89,19 @@ export async function fetchUsersRows({ role = "", search = "", page = 1, limit =
 
   const response = await apiClient.get(`/users?${query.toString()}`);
   const rows = (response.data?.data ?? []).map((user) => ({
+    id: user._id,
     name: user.name,
     email: user.email,
     role: user.role,
+    isActive: Boolean(user.isActive),
     active: user.isActive ? "Active" : "Inactive",
   }));
 
   return { rows, total: response.data?.meta?.total ?? 0 };
+}
+
+export async function updateUserStatus(userId, isActive) {
+  await apiClient.patch(`/users/${userId}/status`, { isActive });
 }
 
 export async function createCatalogItem({ type, title, category, price, stock }) {

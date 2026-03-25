@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import DataTable from "../components/ui/DataTable";
-import { fetchUsersRows } from "../services/dashboardApi";
+import { fetchUsersRows, updateUserStatus } from "../services/dashboardApi";
 
 const columns = [
   { key: "name", label: "Name" },
   { key: "email", label: "Email" },
   { key: "role", label: "Role" },
   { key: "active", label: "Status" },
+  { key: "actions", label: "Actions" },
 ];
 
 export default function UsersPage() {
@@ -44,6 +45,36 @@ export default function UsersPage() {
     };
   }, [role, search]);
 
+  const reload = async () => {
+    const result = await fetchUsersRows({ role, search, page: 1, limit: 10 });
+    setRows(result.rows);
+    setTotal(result.total);
+  };
+
+  const tableRows = rows.map((row) => ({
+    ...row,
+    actions: (
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await updateUserStatus(row.id, !row.isActive);
+            await reload();
+          } catch (err) {
+            setError(err.response?.data?.message || "Failed to update user status");
+          }
+        }}
+        className={`rounded-lg border px-2 py-1 text-xs ${
+          row.isActive
+            ? "border-rose-200 text-rose-700"
+            : "border-emerald-200 text-emerald-700"
+        }`}
+      >
+        {row.isActive ? "Deactivate" : "Activate"}
+      </button>
+    ),
+  }));
+
   return (
     <section className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -73,7 +104,7 @@ export default function UsersPage() {
       </div>
       {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
       {isLoading ? <p className="text-sm text-slate-500">Loading users...</p> : null}
-      <DataTable columns={columns} rows={rows} />
+      <DataTable columns={columns} rows={tableRows} />
     </section>
   );
 }

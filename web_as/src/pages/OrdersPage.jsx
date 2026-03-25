@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import DataTable from "../components/ui/DataTable";
-import { fetchOrderRows } from "../services/dashboardApi";
+import { fetchOrderRows, updateOrderStatus } from "../services/dashboardApi";
 
 const columns = [
   { key: "id", label: "Order ID" },
@@ -8,6 +8,7 @@ const columns = [
   { key: "amount", label: "Amount" },
   { key: "status", label: "Status" },
   { key: "date", label: "Date" },
+  { key: "actions", label: "Actions" },
 ];
 
 export default function OrdersPage() {
@@ -44,6 +45,50 @@ export default function OrdersPage() {
     };
   }, [status]);
 
+  const tableRows = rows.map((row) => ({
+    ...row,
+    actions: (
+      <div className="flex gap-1">
+        {row.status !== "PROCESSING" ? (
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await updateOrderStatus(row.id, "PROCESSING");
+                const result = await fetchOrderRows({ status, page: 1, limit: 10 });
+                setRows(result.rows);
+                setTotal(result.total);
+              } catch (err) {
+                setError(err.response?.data?.message || "Status update failed");
+              }
+            }}
+            className="rounded-lg border border-amber-200 px-2 py-1 text-xs text-amber-700"
+          >
+            Mark Processing
+          </button>
+        ) : null}
+        {row.status !== "DELIVERED" ? (
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await updateOrderStatus(row.id, "DELIVERED");
+                const result = await fetchOrderRows({ status, page: 1, limit: 10 });
+                setRows(result.rows);
+                setTotal(result.total);
+              } catch (err) {
+                setError(err.response?.data?.message || "Status update failed");
+              }
+            }}
+            className="rounded-lg border border-emerald-200 px-2 py-1 text-xs text-emerald-700"
+          >
+            Mark Delivered
+          </button>
+        ) : null}
+      </div>
+    ),
+  }));
+
   return (
     <section className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -65,7 +110,7 @@ export default function OrdersPage() {
       </div>
       {error ? <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
       {isLoading ? <p className="text-sm text-slate-500">Loading orders...</p> : null}
-      <DataTable columns={columns} rows={rows} />
+      <DataTable columns={columns} rows={tableRows} />
     </section>
   );
 }

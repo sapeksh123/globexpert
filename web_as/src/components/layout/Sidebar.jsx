@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { LuBox, LuChartColumnBig, LuLogOut, LuPackageSearch, LuUsers } from "react-icons/lu";
+import { LuBox, LuChartColumnBig, LuLogOut, LuPackageSearch, LuStore, LuUsers } from "react-icons/lu";
 import { useAuth } from "../../context/AuthContext";
 
 const links = [
   { to: "/dashboard", label: "Dashboard", icon: LuChartColumnBig, roles: ["ADMIN", "SELLER"] },
   { to: "/catalog", label: "Catalog", icon: LuBox, roles: ["ADMIN", "SELLER"] },
   { to: "/orders", label: "Orders", icon: LuPackageSearch, roles: ["ADMIN", "SELLER"] },
+  { to: "/sellers", label: "Sellers", icon: LuStore, roles: ["ADMIN"] },
   { to: "/users", label: "Users", icon: LuUsers, roles: ["ADMIN"] },
 ];
 

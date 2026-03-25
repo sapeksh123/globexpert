@@ -5,6 +5,7 @@ import CatalogPage from "./pages/CatalogPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import OrdersPage from "./pages/OrdersPage";
+import SellersPage from "./pages/SellersPage";
 import UsersPage from "./pages/UsersPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -27,6 +28,14 @@ function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="orders" element={<OrdersPage />} />
+        <Route
+          path="sellers"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <SellersPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="users"
           element={
