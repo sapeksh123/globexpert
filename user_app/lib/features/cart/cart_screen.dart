@@ -26,7 +26,7 @@ class CartScreen extends StatelessWidget {
                         spacing: 8,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Text('\$${row.lineTotal.toStringAsFixed(2)}'),
+                          Text('Rs. ${row.lineTotal.toStringAsFixed(2)}'),
                           IconButton(
                             icon: const Icon(Icons.delete_outline),
                             tooltip: 'Remove item',
@@ -44,7 +44,7 @@ class CartScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Total: \$${cart.total.toStringAsFixed(2)}'),
+                Text('Total: Rs. ${cart.total.toStringAsFixed(2)}'),
                 const SizedBox(height: 10),
                 FilledButton(
                   onPressed: cart.isOrdering || cart.items.isEmpty

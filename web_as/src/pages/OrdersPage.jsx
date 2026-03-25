@@ -106,14 +106,14 @@ export default function OrdersPage() {
 
   return (
     <section className="space-y-4">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-900">Order Management</h3>
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <h3 className="text-base font-semibold text-slate-900 sm:text-lg">Order Management</h3>
         <p className="mt-1 text-sm text-slate-600">Track and update order status lifecycle.</p>
-        <div className="mt-4 flex items-center justify-between gap-2">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm sm:w-auto"
           >
             <option value="">All statuses</option>
             <option value="CONFIRMED">CONFIRMED</option>

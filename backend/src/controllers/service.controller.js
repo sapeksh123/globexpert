@@ -13,6 +13,9 @@ const createService = async (req, res, next) => {
     if (req.body.durationMinutes !== undefined) {
       req.body.durationMinutes = Number(req.body.durationMinutes);
     }
+    if (req.body.isActive !== undefined) {
+      req.body.isActive = req.body.isActive === "true";
+    }
 
     const errors = validateCatalogPayload(req.body, { requireStock: false });
     if (errors.length > 0) {
@@ -57,6 +60,9 @@ const updateService = async (req, res, next) => {
     }
     if (req.body.durationMinutes !== undefined) {
       req.body.durationMinutes = Number(req.body.durationMinutes);
+    }
+    if (req.body.isActive !== undefined) {
+      req.body.isActive = req.body.isActive === "true";
     }
 
     const errors = validateCatalogPayload(req.body, { requireStock: false, partial: true });

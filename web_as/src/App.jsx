@@ -5,16 +5,21 @@ import CatalogPage from "./pages/CatalogPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import OrdersPage from "./pages/OrdersPage";
+import ProfilePage from "./pages/ProfilePage";
 import SellersPage from "./pages/SellersPage";
 import UsersPage from "./pages/UsersPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const isPanelUser = ["ADMIN", "SELLER"].includes(user?.role);
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route
+        path="/login"
+        element={isAuthenticated && isPanelUser ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+      />
 
       <Route
         path="/"
@@ -26,6 +31,7 @@ function App() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="profile" element={<ProfilePage />} />
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route
@@ -46,7 +52,7 @@ function App() {
         />
       </Route>
 
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to={isPanelUser ? "/dashboard" : "/login"} replace />} />
     </Routes>
   );
 }

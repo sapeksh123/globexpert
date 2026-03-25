@@ -1,5 +1,13 @@
 import apiClient from "./apiClient";
 
+const toIsoDate = (date) => new Date(date).toISOString().slice(0, 10);
+
+const inRange = (dateIso, fromDate, toDate) => {
+  if (fromDate && dateIso < fromDate) return false;
+  if (toDate && dateIso > toDate) return false;
+  return true;
+};
+
 export async function fetchDashboardStats(userRole) {
   const [products, services, orders] = await Promise.all([
     apiClient.get("/products?limit=1"),
@@ -22,6 +30,71 @@ export async function fetchDashboardStats(userRole) {
     catalog: productTotal + serviceTotal,
     users: usersMeta?.total ?? null,
     revenue: 0,
+  };
+}
+
+export async function fetchSellerDashboardAnalytics({ userId, status = "", fromDate = "", toDate = "" }) {
+  const [productsMeta, servicesMeta] = await Promise.all([
+    apiClient.get(`/products?limit=1${userId ? `&sellerId=${userId}` : ""}`),
+    apiClient.get(`/services?limit=1${userId ? `&sellerId=${userId}` : ""}`),
+  ]);
+
+  const firstPage = await apiClient.get(`/orders?page=1&limit=100${status ? `&status=${status}` : ""}`);
+  const firstRows = firstPage.data?.data ?? [];
+  const totalPages = Number(firstPage.data?.meta?.totalPages || 1);
+
+  const remaining = [];
+  for (let page = 2; page <= totalPages; page += 1) {
+    remaining.push(apiClient.get(`/orders?page=${page}&limit=100${status ? `&status=${status}` : ""}`));
+  }
+
+  const restPages = remaining.length ? await Promise.all(remaining) : [];
+  const allOrders = [
+    ...firstRows,
+    ...restPages.flatMap((response) => response.data?.data ?? []),
+  ];
+
+  const filteredOrders = allOrders.filter((row) => {
+    const dateIso = toIsoDate(row.createdAt);
+    return inRange(dateIso, fromDate, toDate);
+  });
+
+  const revenue = filteredOrders.reduce((sum, row) => sum + Number(row.subtotal || 0), 0);
+
+  const statusMap = {
+    CONFIRMED: 0,
+    PROCESSING: 0,
+    DELIVERED: 0,
+  };
+
+  filteredOrders.forEach((row) => {
+    if (statusMap[row.status] !== undefined) {
+      statusMap[row.status] += 1;
+    }
+  });
+
+  const byDayMap = new Map();
+  filteredOrders.forEach((row) => {
+    const day = toIsoDate(row.createdAt);
+    const current = byDayMap.get(day) || { date: day, orders: 0, revenue: 0 };
+    current.orders += 1;
+    current.revenue += Number(row.subtotal || 0);
+    byDayMap.set(day, current);
+  });
+
+  const byDay = Array.from(byDayMap.values())
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-10);
+
+  return {
+    kpis: {
+      totalOrders: filteredOrders.length,
+      totalRevenue: revenue,
+      totalProducts: productsMeta.data?.meta?.total ?? 0,
+      totalServices: servicesMeta.data?.meta?.total ?? 0,
+    },
+    statusBreakdown: statusMap,
+    trendByDay: byDay,
   };
 }
 
@@ -49,7 +122,7 @@ export async function fetchCatalogRows({ search = "", page = 1, limit = 20, stat
     type: "PRODUCT",
     category: item.category,
     priceValue: Number(item.price || 0),
-    price: `$${Number(item.price || 0).toFixed(2)}`,
+    price: `Rs. ${Number(item.price || 0).toFixed(2)}`,
     stockValue: Number(item.stock || 0),
     durationMinutes: 0,
     imageUrl: item.imageUrl || "",
@@ -64,7 +137,7 @@ export async function fetchCatalogRows({ search = "", page = 1, limit = 20, stat
     type: "SERVICE",
     category: item.category,
     priceValue: Number(item.price || 0),
-    price: `$${Number(item.price || 0).toFixed(2)}`,
+    price: `Rs. ${Number(item.price || 0).toFixed(2)}`,
     stockValue: 0,
     durationMinutes: Number(item.durationMinutes || 30),
     imageUrl: item.imageUrl || "",
@@ -86,7 +159,7 @@ export async function fetchOrderRows({ status = "", page = 1, limit = 10 }) {
   const rows = (response.data?.data ?? []).map((order) => ({
     id: order._id,
     customer: order.user?.name || "-",
-    amount: `$${Number(order.subtotal || 0).toFixed(2)}`,
+    amount: `Rs. ${Number(order.subtotal || 0).toFixed(2)}`,
     status: order.status,
     date: new Date(order.createdAt).toISOString().slice(0, 10),
   }));

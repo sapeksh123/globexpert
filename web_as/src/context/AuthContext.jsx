@@ -26,6 +26,14 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateProfile = async (payload) => {
+    const response = await apiClient.patch("/auth/me", payload);
+    const updatedUser = response.data?.data;
+    setUser(updatedUser);
+    localStorage.setItem("ge_user", JSON.stringify(updatedUser));
+    return updatedUser;
+  };
+
   useEffect(() => {
     const restore = async () => {
       const token = localStorage.getItem("ge_token");
@@ -48,6 +56,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       login,
       logout,
+      updateProfile,
     }),
     [user]
   );

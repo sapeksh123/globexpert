@@ -13,6 +13,9 @@ const createProduct = async (req, res, next) => {
 		if (req.body.stock !== undefined) {
 			req.body.stock = Number(req.body.stock);
 		}
+		if (req.body.isActive !== undefined) {
+			req.body.isActive = req.body.isActive === "true";
+		}
 
 		const errors = validateCatalogPayload(req.body, { requireStock: true });
 		if (errors.length > 0) {
@@ -57,6 +60,9 @@ const updateProduct = async (req, res, next) => {
 		}
 		if (req.body.stock !== undefined) {
 			req.body.stock = Number(req.body.stock);
+		}
+		if (req.body.isActive !== undefined) {
+			req.body.isActive = req.body.isActive === "true";
 		}
 
 		const errors = validateCatalogPayload(req.body, { requireStock: true, partial: true });

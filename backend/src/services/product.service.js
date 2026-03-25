@@ -34,10 +34,14 @@ const listEntities = async (entity, query) => {
 
 	const filter = {};
 	if (query.category) {
-		filter.category = query.category;
+		filter.category = { $regex: query.category, $options: "i" };
 	}
 	if (query.search) {
-		filter.$text = { $search: query.search };
+		filter.$or = [
+			{ title: { $regex: query.search, $options: "i" } },
+			{ description: { $regex: query.search, $options: "i" } },
+			{ category: { $regex: query.search, $options: "i" } },
+		];
 	}
 	if (query.isActive !== undefined) {
 		filter.isActive = query.isActive === "true";

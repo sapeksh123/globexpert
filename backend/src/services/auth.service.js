@@ -75,7 +75,45 @@ const login = async (payload) => {
 	return { user: safeUser, token };
 };
 
+const updateMe = async (userId, payload) => {
+	const user = await User.findById(userId);
+	if (!user) {
+		const error = new Error("User not found");
+		error.statusCode = 404;
+		throw error;
+	}
+
+	if (payload.email !== undefined) {
+		const normalizedEmail = payload.email.toLowerCase();
+		const existingUser = await User.findOne({
+			email: normalizedEmail,
+			_id: { $ne: userId },
+		});
+		if (existingUser) {
+			const error = new Error("Email already in use");
+			error.statusCode = 409;
+			throw error;
+		}
+		user.email = normalizedEmail;
+	}
+
+	if (payload.name !== undefined) {
+		user.name = payload.name;
+	}
+	if (payload.phone !== undefined) {
+		user.phone = payload.phone;
+	}
+	if (payload.address !== undefined) {
+		user.address = payload.address;
+	}
+
+	await user.save();
+
+	return User.findById(userId).select("-password");
+};
+
 module.exports = {
 	register,
 	login,
+	updateMe,
 };

@@ -11,12 +11,26 @@ export function ToastProvider({ children }) {
 
   const showToast = useCallback((message, tone = "info") => {
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    setToasts((prev) => [...prev, { id, message, tone }]);
+    setToasts((prev) => [...prev, { id, message, tone, type: "info" }]);
 
     setTimeout(() => removeToast(id), 3000);
   }, [removeToast]);
 
-  const value = useMemo(() => ({ showToast }), [showToast]);
+  const showConfirmToast = useCallback((message, onConfirm) => {
+    const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    setToasts((prev) => [
+      ...prev,
+      {
+        id,
+        message,
+        tone: "info",
+        type: "confirm",
+        onConfirm,
+      },
+    ]);
+  }, []);
+
+  const value = useMemo(() => ({ showToast, showConfirmToast }), [showToast, showConfirmToast]);
 
   return (
     <ToastContext.Provider value={value}>
@@ -33,7 +47,30 @@ export function ToastProvider({ children }) {
                   : "border-slate-200 bg-white text-slate-800"
             }`}
           >
-            {toast.message}
+            <p>{toast.message}</p>
+            {toast.type === "confirm" ? (
+              <div className="mt-3 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => removeToast(toast.id)}
+                  className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600"
+                >
+                  No
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeToast(toast.id);
+                    if (typeof toast.onConfirm === "function") {
+                      toast.onConfirm();
+                    }
+                  }}
+                  className="rounded-lg bg-[#0e1b32] px-2 py-1 text-xs text-white"
+                >
+                  Yes, logout
+                </button>
+              </div>
+            ) : null}
           </div>
         ))}
       </div>

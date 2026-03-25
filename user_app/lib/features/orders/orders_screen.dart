@@ -126,7 +126,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 const Text('Confirmed  •  Processing  •  Delivered'),
               ],
             ),
-            trailing: Text('\$${order.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600)),
+            trailing: Text('Rs. ${order.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600)),
           ),
         );
       },

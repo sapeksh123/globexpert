@@ -32,7 +32,34 @@ const validateLoginPayload = (payload) => {
 	return errors;
 };
 
+const validateProfileUpdatePayload = (payload) => {
+	const errors = [];
+	const allowed = ["name", "email", "phone", "address"];
+	const keys = Object.keys(payload || {});
+
+	if (keys.length === 0) {
+		errors.push("At least one field is required to update profile");
+		return errors;
+	}
+
+	for (const key of keys) {
+		if (!allowed.includes(key)) {
+			errors.push(`Field ${key} is not allowed`);
+		}
+	}
+
+	if (payload.name !== undefined && payload.name.trim().length < 2) {
+		errors.push("Name must be at least 2 characters");
+	}
+	if (payload.email !== undefined && !isEmail(payload.email)) {
+		errors.push("Valid email is required");
+	}
+
+	return errors;
+};
+
 module.exports = {
 	validateRegisterPayload,
 	validateLoginPayload,
+	validateProfileUpdatePayload,
 };

@@ -68,17 +68,32 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   itemBuilder: (context, index) {
                     final item = provider.filteredItems[index];
                     return Card(
-                      child: ListTile(
-                        title: Text(item.title),
-                        subtitle: Text('${item.category} • ${item.itemType}'),
-                        trailing: FilledButton.tonal(
-                          onPressed: () {
-                            context.read<CartProvider>().addItem(item);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${item.title} added to cart')),
-                            );
-                          },
-                          child: Text('\$${item.price.toStringAsFixed(2)}'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item.title, style: Theme.of(context).textTheme.titleMedium),
+                                  const SizedBox(height: 4),
+                                  Text('${item.category} • ${item.itemType}'),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            FilledButton.tonal(
+                              onPressed: () {
+                                context.read<CartProvider>().addItem(item);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${item.title} added to cart')),
+                                );
+                              },
+                              child: Text('Rs. ${item.price.toStringAsFixed(2)}'),
+                            ),
+                          ],
                         ),
                       ),
                     );
