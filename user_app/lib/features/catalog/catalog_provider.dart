@@ -10,9 +10,11 @@ class CatalogProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   String _query = '';
+  String _errorMessage = '';
   List<CatalogItem> _items = [];
 
   bool get isLoading => _isLoading;
+  String get errorMessage => _errorMessage;
 
   List<CatalogItem> get filteredItems {
     if (_query.isEmpty) {
@@ -26,10 +28,13 @@ class CatalogProvider extends ChangeNotifier {
 
   Future<void> loadCatalog() async {
     _isLoading = true;
+    _errorMessage = '';
     notifyListeners();
 
     try {
       _items = await _catalogService.getCatalog();
+    } catch (error) {
+      _errorMessage = error.toString().replaceFirst('Exception: ', '');
     } finally {
       _isLoading = false;
       notifyListeners();

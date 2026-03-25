@@ -34,9 +34,34 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ),
         ),
         const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton.icon(
+              onPressed: provider.isLoading
+                  ? null
+                  : () => context.read<CatalogProvider>().loadCatalog(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
         Expanded(
           child: provider.isLoading
               ? const Center(child: CircularProgressIndicator())
+              : provider.errorMessage.isNotEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          provider.errorMessage,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                      ),
+                    )
+                  : provider.filteredItems.isEmpty
+                      ? const Center(child: Text('No catalog items found'))
               : ListView.separated(
                   itemCount: provider.filteredItems.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 8),

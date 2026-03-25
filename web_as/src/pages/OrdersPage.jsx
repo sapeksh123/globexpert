@@ -18,6 +18,7 @@ export default function OrdersPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionKey, setActionKey] = useState("");
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -54,7 +55,9 @@ export default function OrdersPage() {
         {row.status !== "PROCESSING" ? (
           <button
             type="button"
+            disabled={Boolean(actionKey)}
             onClick={async () => {
+              setActionKey(`processing-${row.id}`);
               try {
                 await updateOrderStatus(row.id, "PROCESSING");
                 const result = await fetchOrderRows({ status, page: 1, limit: 10 });
@@ -64,17 +67,21 @@ export default function OrdersPage() {
               } catch (err) {
                 setError(err.response?.data?.message || "Status update failed");
                 showToast("Status update failed", "error");
+              } finally {
+                setActionKey("");
               }
             }}
             className="rounded-lg border border-amber-200 px-2 py-1 text-xs text-amber-700"
           >
-            Mark Processing
+            {actionKey === `processing-${row.id}` ? "Updating..." : "Mark Processing"}
           </button>
         ) : null}
         {row.status !== "DELIVERED" ? (
           <button
             type="button"
+            disabled={Boolean(actionKey)}
             onClick={async () => {
+              setActionKey(`delivered-${row.id}`);
               try {
                 await updateOrderStatus(row.id, "DELIVERED");
                 const result = await fetchOrderRows({ status, page: 1, limit: 10 });
@@ -84,11 +91,13 @@ export default function OrdersPage() {
               } catch (err) {
                 setError(err.response?.data?.message || "Status update failed");
                 showToast("Status update failed", "error");
+              } finally {
+                setActionKey("");
               }
             }}
             className="rounded-lg border border-emerald-200 px-2 py-1 text-xs text-emerald-700"
           >
-            Mark Delivered
+            {actionKey === `delivered-${row.id}` ? "Updating..." : "Mark Delivered"}
           </button>
         ) : null}
       </div>

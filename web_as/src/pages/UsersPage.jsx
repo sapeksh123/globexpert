@@ -18,6 +18,7 @@ export default function UsersPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionKey, setActionKey] = useState("");
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -58,7 +59,9 @@ export default function UsersPage() {
     actions: (
       <button
         type="button"
+        disabled={Boolean(actionKey)}
         onClick={async () => {
+          setActionKey(`user-${row.id}`);
           try {
             await updateUserStatus(row.id, !row.isActive);
             await reload();
@@ -66,6 +69,8 @@ export default function UsersPage() {
           } catch (err) {
             setError(err.response?.data?.message || "Failed to update user status");
             showToast("User status update failed", "error");
+          } finally {
+            setActionKey("");
           }
         }}
         className={`rounded-lg border px-2 py-1 text-xs ${
@@ -74,7 +79,7 @@ export default function UsersPage() {
             : "border-emerald-200 text-emerald-700"
         }`}
       >
-        {row.isActive ? "Deactivate" : "Activate"}
+        {actionKey === `user-${row.id}` ? "Saving..." : row.isActive ? "Deactivate" : "Activate"}
       </button>
     ),
   }));

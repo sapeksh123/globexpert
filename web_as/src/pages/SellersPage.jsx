@@ -17,6 +17,7 @@ export default function SellersPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionKey, setActionKey] = useState("");
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -60,7 +61,9 @@ export default function SellersPage() {
       <div className="flex gap-1">
         <button
           type="button"
+          disabled={Boolean(actionKey)}
           onClick={async () => {
+            setActionKey(`approve-${row.id}`);
             try {
               await updateSellerStatus(row.id, "APPROVED");
               await reload();
@@ -68,15 +71,19 @@ export default function SellersPage() {
             } catch (err) {
               setError(err.response?.data?.message || "Failed to approve seller");
               showToast("Approve action failed", "error");
+            } finally {
+              setActionKey("");
             }
           }}
           className="rounded-lg border border-emerald-200 px-2 py-1 text-xs text-emerald-700"
         >
-          Approve
+          {actionKey === `approve-${row.id}` ? "Saving..." : "Approve"}
         </button>
         <button
           type="button"
+          disabled={Boolean(actionKey)}
           onClick={async () => {
+            setActionKey(`reject-${row.id}`);
             try {
               await updateSellerStatus(row.id, "REJECTED");
               await reload();
@@ -84,11 +91,13 @@ export default function SellersPage() {
             } catch (err) {
               setError(err.response?.data?.message || "Failed to reject seller");
               showToast("Reject action failed", "error");
+            } finally {
+              setActionKey("");
             }
           }}
           className="rounded-lg border border-rose-200 px-2 py-1 text-xs text-rose-700"
         >
-          Reject
+          {actionKey === `reject-${row.id}` ? "Saving..." : "Reject"}
         </button>
       </div>
     ),

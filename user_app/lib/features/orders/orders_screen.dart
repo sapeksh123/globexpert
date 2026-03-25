@@ -60,6 +60,29 @@ class _OrdersScreenState extends State<OrdersScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (provider.errorMessage.isNotEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                provider.errorMessage,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.tonal(
+                onPressed: () => context.read<OrdersProvider>().loadOrders(),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (provider.orders.isEmpty) {
       return const Center(child: Text('No orders yet'));
     }

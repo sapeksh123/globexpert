@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -26,29 +27,63 @@ class ApiClient {
     Map<String, dynamic> body, {
     bool authenticated = false,
   }) async {
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}$path'),
-      headers: await _headers(authenticated: authenticated),
-      body: jsonEncode(body),
-    );
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}$path'),
+            headers: await _headers(authenticated: authenticated),
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 20));
 
-    return _parse(response);
+      return _parse(response);
+    } on SocketException {
+      throw Exception('Network error: unable to reach backend. Check host/port and internet connection.');
+    } on HttpException {
+      throw Exception('HTTP error while contacting backend.');
+    } on FormatException {
+      throw Exception('Invalid response from backend.');
+    }
   }
 
   Future<Map<String, dynamic>> get(String path, {bool authenticated = false}) async {
-    final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}$path'),
-      headers: await _headers(authenticated: authenticated),
-    );
+    try {
+      final response = await http
+          .get(
+            Uri.parse('${ApiConfig.baseUrl}$path'),
+            headers: await _headers(authenticated: authenticated),
+          )
+          .timeout(const Duration(seconds: 20));
 
-    return _parse(response);
+      return _parse(response);
+    } on SocketException {
+      throw Exception('Network error: unable to reach backend. Check host/port and internet connection.');
+    } on HttpException {
+      throw Exception('HTTP error while contacting backend.');
+    } on FormatException {
+      throw Exception('Invalid response from backend.');
+    }
   }
 
   Map<String, dynamic> _parse(http.Response response) {
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final raw = response.body;
+    Map<String, dynamic> decoded = {};
+
+    if (raw.isNotEmpty) {
+      final parsed = jsonDecode(raw);
+      if (parsed is Map<String, dynamic>) {
+        decoded = parsed;
+      }
+    }
+
     if (response.statusCode >= 400) {
       throw Exception(decoded['message']?.toString() ?? 'API request failed');
     }
+
+    if (decoded.isNotEmpty && decoded['success'] == false) {
+      throw Exception(decoded['message']?.toString() ?? 'API request failed');
+    }
+
     return decoded;
   }
 }

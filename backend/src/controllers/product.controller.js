@@ -1,11 +1,19 @@
 const ProductService = require("../services/product.service");
 const { sendSuccess } = require("../utils/response");
+const { uploadImageBuffer } = require("../utils/cloudinary");
 const { validateCatalogPayload } = require("../validators/product.validator");
 
 const ENTITY = "product";
 
 const createProduct = async (req, res, next) => {
 	try {
+		if (req.body.price !== undefined) {
+			req.body.price = Number(req.body.price);
+		}
+		if (req.body.stock !== undefined) {
+			req.body.stock = Number(req.body.stock);
+		}
+
 		const errors = validateCatalogPayload(req.body, { requireStock: true });
 		if (errors.length > 0) {
 			return res.status(400).json({ success: false, message: "Validation failed", errors });
@@ -13,7 +21,8 @@ const createProduct = async (req, res, next) => {
 
 		const payload = { ...req.body };
 		if (req.file) {
-			payload.imageUrl = `/uploads/${req.file.filename}`;
+			const uploaded = await uploadImageBuffer(req.file.buffer, "globexpert/products");
+			payload.imageUrl = uploaded.secure_url;
 		}
 
 		const product = await ProductService.createEntity(ENTITY, payload, req.user);
@@ -43,6 +52,13 @@ const getProductById = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
 	try {
+		if (req.body.price !== undefined) {
+			req.body.price = Number(req.body.price);
+		}
+		if (req.body.stock !== undefined) {
+			req.body.stock = Number(req.body.stock);
+		}
+
 		const errors = validateCatalogPayload(req.body, { requireStock: true, partial: true });
 		if (errors.length > 0) {
 			return res.status(400).json({ success: false, message: "Validation failed", errors });
@@ -50,7 +66,8 @@ const updateProduct = async (req, res, next) => {
 
 		const payload = { ...req.body };
 		if (req.file) {
-			payload.imageUrl = `/uploads/${req.file.filename}`;
+			const uploaded = await uploadImageBuffer(req.file.buffer, "globexpert/products");
+			payload.imageUrl = uploaded.secure_url;
 		}
 
 		const product = await ProductService.updateEntity(

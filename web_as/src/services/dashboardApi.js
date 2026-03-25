@@ -25,10 +25,16 @@ export async function fetchDashboardStats(userRole) {
   };
 }
 
-export async function fetchCatalogRows({ search = "", page = 1, limit = 10 }) {
+export async function fetchCatalogRows({ search = "", page = 1, limit = 20, status = "", category = "" }) {
   const query = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (search.trim()) {
     query.set("search", search.trim());
+  }
+  if (status) {
+    query.set("isActive", status === "Active" ? "true" : "false");
+  }
+  if (category.trim()) {
+    query.set("category", category.trim());
   }
 
   const [products, services] = await Promise.all([
@@ -39,22 +45,30 @@ export async function fetchCatalogRows({ search = "", page = 1, limit = 10 }) {
   const productRows = (products.data?.data ?? []).map((item) => ({
     id: item._id,
     title: item.title,
+    description: item.description ?? "",
     type: "PRODUCT",
     category: item.category,
     priceValue: Number(item.price || 0),
     price: `$${Number(item.price || 0).toFixed(2)}`,
     stockValue: Number(item.stock || 0),
+    durationMinutes: 0,
+    imageUrl: item.imageUrl || "",
+    isActive: Boolean(item.isActive),
     status: item.isActive ? "Active" : "Inactive",
   }));
 
   const serviceRows = (services.data?.data ?? []).map((item) => ({
     id: item._id,
     title: item.title,
+    description: item.description ?? "",
     type: "SERVICE",
     category: item.category,
     priceValue: Number(item.price || 0),
     price: `$${Number(item.price || 0).toFixed(2)}`,
     stockValue: 0,
+    durationMinutes: Number(item.durationMinutes || 30),
+    imageUrl: item.imageUrl || "",
+    isActive: Boolean(item.isActive),
     status: item.isActive ? "Active" : "Inactive",
   }));
 
@@ -106,44 +120,56 @@ export async function updateUserStatus(userId, isActive) {
   await apiClient.patch(`/users/${userId}/status`, { isActive });
 }
 
-export async function createCatalogItem({ type, title, category, price, stock }) {
+export async function createCatalogItem({ type, title, category, description, price, stock, durationMinutes, isActive }) {
+  const payload = new FormData();
+  payload.append("title", title);
+  payload.append("category", category);
+  payload.append("description", description || "");
+  payload.append("price", String(Number(price)));
+  payload.append("isActive", String(Boolean(isActive)));
+
   if (type === "PRODUCT") {
-    await apiClient.post("/products", {
-      title,
-      category,
-      price: Number(price),
-      stock: Number(stock || 0),
-      description: "",
-    });
+    payload.append("stock", String(Number(stock || 0)));
+  } else {
+    payload.append("durationMinutes", String(Number(durationMinutes || 30)));
+  }
+
+  if (arguments[0]?.imageFile) {
+    payload.append("image", arguments[0].imageFile);
+  }
+
+  if (type === "PRODUCT") {
+    await apiClient.post("/products", payload);
     return;
   }
 
-  await apiClient.post("/services", {
-    title,
-    category,
-    price: Number(price),
-    durationMinutes: 30,
-    description: "",
-  });
+  await apiClient.post("/services", payload);
 }
 
-export async function updateCatalogItem({ id, type, title, category, price, stock }) {
+export async function updateCatalogItem({ id, type, title, category, description, price, stock, durationMinutes, isActive }) {
+  const payload = new FormData();
+  payload.append("title", title);
+  payload.append("category", category);
+  payload.append("description", description || "");
+  payload.append("price", String(Number(price)));
+  payload.append("isActive", String(Boolean(isActive)));
+
   if (type === "PRODUCT") {
-    await apiClient.put(`/products/${id}`, {
-      title,
-      category,
-      price: Number(price),
-      stock: Number(stock || 0),
-    });
+    payload.append("stock", String(Number(stock || 0)));
+  } else {
+    payload.append("durationMinutes", String(Number(durationMinutes || 30)));
+  }
+
+  if (arguments[0]?.imageFile) {
+    payload.append("image", arguments[0].imageFile);
+  }
+
+  if (type === "PRODUCT") {
+    await apiClient.put(`/products/${id}`, payload);
     return;
   }
 
-  await apiClient.put(`/services/${id}`, {
-    title,
-    category,
-    price: Number(price),
-    durationMinutes: 30,
-  });
+  await apiClient.put(`/services/${id}`, payload);
 }
 
 export async function deleteCatalogItem({ type, id }) {

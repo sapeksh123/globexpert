@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { showToast } = useToast();
   const [form, setForm] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,13 +18,23 @@ export default function LoginPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+
+    if (!form.email.includes("@") || !form.password.trim()) {
+      setError("Enter a valid email and password");
+      showToast("Enter a valid email and password", "error");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       await login(form);
+      showToast("Login successful", "success");
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      const message = err.normalizedMessage || err.response?.data?.message || "Login failed";
+      setError(message);
+      showToast(message, "error");
     } finally {
       setIsLoading(false);
     }

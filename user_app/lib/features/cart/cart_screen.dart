@@ -22,7 +22,18 @@ class CartScreen extends StatelessWidget {
                     return ListTile(
                       title: Text(row.item.title),
                       subtitle: Text('x${row.quantity} • ${row.item.itemType}'),
-                      trailing: Text('\$${row.lineTotal.toStringAsFixed(2)}'),
+                      trailing: Wrap(
+                        spacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text('\$${row.lineTotal.toStringAsFixed(2)}'),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            tooltip: 'Remove item',
+                            onPressed: () => cart.removeItem(row),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
