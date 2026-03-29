@@ -30,7 +30,11 @@ class _HomeShellState extends State<HomeShell> {
     final isWide = width >= 900;
 
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_index])),
+      appBar: AppBar(
+        title: Text(_titles[_index]),
+        elevation: 1,
+        centerTitle: false,
+      ),
       body: isWide
           ? Row(
               children: [
