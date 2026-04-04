@@ -64,7 +64,7 @@ export function ToastProvider({ children }) {
                   onClick={() => removeToast(toast.id)}
                   className="rounded-lg border border-slate-300 bg-white/70 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-white"
                 >
-                  No
+                  No 
                 </button>
                 <button
                   type="button"
