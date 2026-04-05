@@ -39,23 +39,32 @@ export function ToastProvider({ children }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto rounded-xl border px-4 py-3 text-sm shadow-lg ${
+            className={`pointer-events-auto relative overflow-hidden rounded-2xl border px-4 py-3 text-sm shadow-lg shadow-slate-900/10 backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5 ${
               toast.tone === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                ? "border-emerald-200 bg-emerald-50/95 text-emerald-800"
                 : toast.tone === "error"
-                  ? "border-rose-200 bg-rose-50 text-rose-800"
-                  : "border-slate-200 bg-white text-slate-800"
+                  ? "border-rose-200 bg-rose-50/95 text-rose-800"
+                  : "border-slate-200 bg-white/95 text-slate-800"
             }`}
           >
+            <span
+              className={`absolute inset-y-0 left-0 w-1.5 ${
+                toast.tone === "success"
+                  ? "bg-emerald-500"
+                  : toast.tone === "error"
+                    ? "bg-rose-500"
+                    : "bg-slate-400"
+              }`}
+            />
             <p>{toast.message}</p>
             {toast.type === "confirm" ? (
               <div className="mt-3 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => removeToast(toast.id)}
-                  className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600"
+                  className="rounded-lg border border-slate-300 bg-white/70 px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-white"
                 >
-                  No 
+                  No
                 </button>
                 <button
                   type="button"
@@ -65,7 +74,7 @@ export function ToastProvider({ children }) {
                       toast.onConfirm();
                     }
                   }}
-                  className="rounded-lg bg-red-700 px-2 py-1 text-xs text-white"
+                  className="rounded-lg bg-red-700 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-red-800"
                 >
                   YES, LOGOUT
                 </button>
