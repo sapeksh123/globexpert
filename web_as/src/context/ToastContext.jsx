@@ -67,7 +67,7 @@ export function ToastProvider({ children }) {
                   }}
                   className="rounded-lg bg-red-700 px-2 py-1 text-xs text-white"
                 >
-                  Yes, Logout
+                  YES, LOGOUT
                 </button>
               </div>
             ) : null}
