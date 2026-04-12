@@ -86,14 +86,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#08111f] text-white">
+    <div className="auth-shell relative min-h-screen bg-[#08111f] text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(31,138,112,0.22),transparent_30%),radial-gradient(circle_at_top_right,rgba(244,231,210,0.15),transparent_28%),linear-gradient(135deg,#08111f_0%,#0e1b32_55%,#16325f_100%)]" />
-      <div className="absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-[#1f8a70]/20 blur-3xl" />
-      <div className="absolute bottom-[-7rem] right-[-5rem] h-80 w-80 rounded-full bg-[#f4e7d2]/10 blur-3xl" />
+      <div className="auth-float absolute -left-32 -top-24 h-72 w-72 rounded-full bg-[#1f8a70]/20 blur-3xl" />
+      <div className="auth-float absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-[#f4e7d2]/10 blur-3xl" />
 
       <main className="relative mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-6 sm:px-6 lg:px-8">
         <div className="grid w-full items-stretch gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-          <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-[0_30px_90px_rgba(2,6,23,0.45)] backdrop-blur-xl sm:p-8 lg:p-10">
+          <section className="auth-card relative overflow-hidden rounded-4xl border border-white/10 bg-white/6 p-6 shadow-[0_30px_90px_rgba(2,6,23,0.45)] backdrop-blur-xl sm:p-8 lg:p-10">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),transparent_32%,rgba(255,255,255,0.02)_68%,transparent)]" />
             <div className="relative flex h-full flex-col justify-between gap-8">
               <div className="flex items-center gap-3 text-sm font-medium text-white/85">
@@ -120,7 +120,7 @@ export default function LoginPage() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 {stats.map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/6 p-4 backdrop-blur-sm">
+                  <div key={item.label} className="auth-card rounded-2xl border border-white/10 bg-white/6 p-4 backdrop-blur-sm">
                     <p className="text-2xl font-semibold text-white">{item.value}</p>
                     <p className="mt-1 text-sm text-white/62">{item.label}</p>
                   </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
 
               <div className="grid gap-3">
                 {accessPoints.map((point) => (
-                  <div key={point} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-white/80">
+                  <div key={point} className="auth-card flex items-start gap-3 rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-white/80">
                     <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1f8a70]/20 text-[#8ce3cd]">
                       <LuShieldCheck className="text-base" />
                     </span>
@@ -142,9 +142,9 @@ export default function LoginPage() {
 
           <form
             onSubmit={handleSubmit}
-            className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/96 p-6 text-slate-900 shadow-[0_30px_90px_rgba(2,6,23,0.38)] backdrop-blur-xl sm:p-8 lg:p-10"
+            className="auth-card relative overflow-hidden rounded-4xl border border-white/70 bg-white/96 p-6 text-slate-900 shadow-[0_30px_90px_rgba(2,6,23,0.38)] backdrop-blur-xl sm:p-8 lg:p-10"
           >
-            <div className="absolute right-0 top-0 h-28 w-28 rounded-full bg-[#1f8a70]/10 blur-3xl" />
+            <div className="auth-float absolute right-0 top-0 h-28 w-28 rounded-full bg-[#1f8a70]/10 blur-3xl" />
             <div className="relative">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#1f8a70]">Globexpert login</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Welcome back</h2>
@@ -153,7 +153,7 @@ export default function LoginPage() {
               </p>
 
               <div className="mt-8 space-y-5">
-                <label className="block">
+                <label className="auth-card auth-delay-1 block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">Email address</span>
                   <input
                     type="email"
@@ -167,7 +167,7 @@ export default function LoginPage() {
                   />
                 </label>
 
-                <label className="block">
+                <label className="auth-card auth-delay-2 block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">Password</span>
                   <div className="relative">
                     <input
@@ -202,13 +202,13 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0e1b32] px-4 py-3.5 font-semibold text-white shadow-lg shadow-[#0e1b32]/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#16325f] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                className="auth-card auth-delay-3 mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0e1b32] px-4 py-3.5 font-semibold text-white shadow-lg shadow-[#0e1b32]/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#16325f] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {isLoading ? "Signing in..." : "Sign in"}
                 {!isLoading ? <LuArrowRight className="text-lg" /> : null}
               </button>
 
-              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              <div className="auth-card auth-delay-3 mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                 <p className="font-medium text-slate-800">Need seller access?</p>
                 <p className="mt-1 leading-6">
                   Create a seller account and wait for approval before signing in.

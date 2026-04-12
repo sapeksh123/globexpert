@@ -19,3 +19,68 @@ body {
 	color: #0f172a;
 	background: #f8fafc;
 }
+
+@keyframes authFadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(18px) scale(0.985);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes authFloat {
+	0%,
+	100% {
+		transform: translate3d(0, 0, 0);
+	}
+
+	50% {
+		transform: translate3d(0, -10px, 0);
+	}
+}
+
+.auth-shell {
+	position: relative;
+	overflow: hidden;
+}
+
+.auth-shell::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+	background-size: 24px 24px;
+	opacity: 0.08;
+	pointer-events: none;
+}
+
+.auth-card {
+	animation: authFadeUp 700ms ease both;
+}
+
+.auth-float {
+	animation: authFloat 8s ease-in-out infinite;
+}
+
+.auth-delay-1 {
+	animation-delay: 120ms;
+}
+
+.auth-delay-2 {
+	animation-delay: 220ms;
+}
+
+.auth-delay-3 {
+	animation-delay: 320ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.auth-card,
+	.auth-float {
+		animation: none;
+	}
+}
