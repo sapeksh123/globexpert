@@ -6,7 +6,7 @@ Multi-platform marketplace connecting sellers with customers for products and se
 
 - **backend/** - Node.js/Express API + MongoDB
 - **user_app/** - Flutter mobile app (iOS/Android)
-- **web_as/** - React admin web app  
+- **web_as/** - React admin web app       
 
 ## Features
 
