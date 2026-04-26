@@ -55,7 +55,7 @@ export function ToastProvider({ children }) {
                   onClick={() => removeToast(toast.id)}
                   className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600"
                 >
-                  No
+                  No 
                 </button>
                 <button
                   type="button"
@@ -67,7 +67,7 @@ export function ToastProvider({ children }) {
                   }}
                   className="rounded-lg bg-red-700 px-2 py-1 text-xs text-white"
                 >
-                  Yes, logout
+                  Yes, Logout
                 </button>
               </div>
             ) : null}
