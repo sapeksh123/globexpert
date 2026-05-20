@@ -32,6 +32,13 @@ export default function DashboardPage() {
     },
   });
 
+  const trendByDay = statsData.trendByDay || [];
+  const statusBreakdown = statsData.statusBreakdown || statsData.orderStatusBreakdown || {
+    CONFIRMED: 0,
+    PROCESSING: 0,
+    DELIVERED: 0,
+  };
+
   useEffect(() => {
     let active = true;
 
@@ -42,11 +49,11 @@ export default function DashboardPage() {
         const data = isAdmin
           ? await fetchAdminDashboardAnalytics()
           : await fetchSellerDashboardAnalytics({
-              userId: user?._id,
-              status,
-              fromDate,
-              toDate,
-            });
+            userId: user?._id,
+            status,
+            fromDate,
+            toDate,
+          });
         if (active) {
           setStatsData(data);
         }
@@ -67,8 +74,8 @@ export default function DashboardPage() {
     };
   }, [isAdmin, user?._id, status, fromDate, toDate]);
 
-  const maxOrders = Math.max(...statsData.trendByDay.map((item) => item.orders), 1);
-  const maxRevenue = Math.max(...statsData.trendByDay.map((item) => item.revenue), 1);
+  const maxOrders = trendByDay.length > 0 ? Math.max(...trendByDay.map((item) => item.orders), 1) : 1;
+  const maxRevenue = trendByDay.length > 0 ? Math.max(...trendByDay.map((item) => item.revenue), 1) : 1;
 
   const sellerStats = useMemo(
     () => [
@@ -265,9 +272,9 @@ export default function DashboardPage() {
           <h3 className="text-base font-semibold text-slate-900 sm:text-lg">Order Status Analytics</h3>
           <div className="mt-4 space-y-3 text-sm">
             {[
-              ["CONFIRMED", statsData.statusBreakdown.CONFIRMED],
-              ["PROCESSING", statsData.statusBreakdown.PROCESSING],
-              ["DELIVERED", statsData.statusBreakdown.DELIVERED],
+              ["CONFIRMED", statusBreakdown.CONFIRMED],
+              ["PROCESSING", statusBreakdown.PROCESSING],
+              ["DELIVERED", statusBreakdown.DELIVERED],
             ].map(([label, value]) => {
               const total = Math.max(statsData.kpis.totalOrders, 1);
               const width = Math.round((Number(value) / total) * 100);
@@ -289,10 +296,10 @@ export default function DashboardPage() {
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <h3 className="text-base font-semibold text-slate-900 sm:text-lg">Orders and Revenue Trend</h3>
           <div className="mt-4 space-y-3">
-            {statsData.trendByDay.length === 0 ? (
+            {trendByDay.length === 0 ? (
               <p className="text-sm text-slate-500">No data available for selected filters.</p>
             ) : (
-              statsData.trendByDay.map((row) => (
+              trendByDay.map((row) => (
                 <div key={row.date} className="space-y-1">
                   <div className="flex flex-wrap items-center justify-between gap-1 text-xs text-slate-500">
                     <span>{row.date}</span>
