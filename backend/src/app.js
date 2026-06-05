@@ -8,6 +8,7 @@ const sellerRoutes = require("./routes/seller.routes");
 const productRoutes = require("./routes/product.routes");
 const serviceRoutes = require("./routes/service.routes");
 const orderRoutes = require("./routes/order.routes");
+const healthRoutes = require("./routes/health.routes");
 const { notFound, errorHandler } = require("./middleware/error.middleware");
 
 const app = express();
@@ -21,6 +22,7 @@ app.get("/", (_req, res) => {
 	res.status(200).json({ success: true, message: "Globexpert API is running" });
 });
 
+app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/sellers", sellerRoutes);
