@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/toast_extension.dart';
 import '../cart/cart_provider.dart';
 import 'catalog_provider.dart';
 
@@ -87,9 +88,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             FilledButton.tonal(
                               onPressed: () {
                                 context.read<CartProvider>().addItem(item);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('${item.title} added to cart')),
-                                );
+                                context.showSuccessToast('${item.title} added to cart');
                               },
                               child: Text('Rs. ${item.price.toStringAsFixed(2)}'),
                             ),

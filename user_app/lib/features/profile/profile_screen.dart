@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/toast_extension.dart';
 import '../auth/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -25,9 +26,7 @@ class ProfileScreen extends StatelessWidget {
           onPressed: () async {
             await auth.logout();
             if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Logged out')),
-            );
+            context.showSuccessToast('Logged out');
           },
           icon: const Icon(Icons.logout),
           label: const Text('Logout'),

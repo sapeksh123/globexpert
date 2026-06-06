@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/toast_extension.dart';
 import 'auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -46,13 +47,13 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_isRegisterMode ? 'Registration successful' : 'Login successful')),
+      context.showSuccessToast(
+        _isRegisterMode ? 'Registration successful' : 'Login successful',
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString().replaceFirst('Exception: ', ''))),
+      context.showErrorToast(
+        error.toString().replaceFirst('Exception: ', ''),
       );
     }
   }

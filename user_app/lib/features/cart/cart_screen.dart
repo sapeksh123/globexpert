@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/toast_extension.dart';
 import 'cart_provider.dart';
 
 class CartScreen extends StatelessWidget {
@@ -53,13 +54,10 @@ class CartScreen extends StatelessWidget {
                           try {
                             await cart.placeOrder('Default user address');
                             if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Order placed successfully')),
-                            );
+                            context.showSuccessToast('Order placed successfully');
                           } catch (error) {
                             if (!context.mounted) return;
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text(error.toString())));
+                            context.showErrorToast(error.toString());
                           }
                         },
                   child: Text(cart.isOrdering ? 'Placing...' : 'Place Order'),
