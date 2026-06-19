@@ -36,7 +36,7 @@ async function run() {
       isActive: true,
     },
     {
-      name: "Sample Customer",
+      name: "Sample Customers",
       email: "user@globexpert.com",
       password,
       role: "USER",
