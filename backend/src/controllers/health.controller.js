@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { sendSuccess } = require("../utils/response");
+const { version } = require("../../package.json");
 
 const check = (req, res, next) => {
 	try {
@@ -12,6 +13,7 @@ const check = (req, res, next) => {
 			timestamp,
 			uptime: Math.round(uptime),
 			environment: process.env.NODE_ENV || "development",
+			version,
 			database: {
 				connected: dbConnected,
 				state: getMongooseState(mongoose.connection.readyState),
