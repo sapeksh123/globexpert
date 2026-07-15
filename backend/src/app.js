@@ -19,7 +19,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get("/", (_req, res) => {
-	res.status(200).json({ success: true, message: "Globexpert API is running" });
+	res.status(200).json({
+		success: true,
+		message: "Globexpert API is running",
+		timestamp: new Date().toISOString(),
+	});
 });
 
 app.use("/api/health", healthRoutes);
