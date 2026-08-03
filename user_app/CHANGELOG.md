@@ -27,6 +27,7 @@ August 2 maintenance note
 August 2 documentation note
 August 3 testing note
 August 3 cleanup note
+August 3 release note
 
 
 
