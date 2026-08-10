@@ -34,6 +34,7 @@ const readiness = (req, res, next) => {
 
 		return sendSuccess(res, statusCode, "Readiness check completed", {
 			status,
+			timestamp: new Date().toISOString(),
 			database: {
 				connected: dbConnected,
 				state: getMongooseState(mongoose.connection.readyState),
