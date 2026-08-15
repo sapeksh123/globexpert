@@ -33,6 +33,7 @@ August 7 stability update
 August 14 feature update
 August 14 documentation update
 August 15 testing update
+August 15 release update
 
 
 
