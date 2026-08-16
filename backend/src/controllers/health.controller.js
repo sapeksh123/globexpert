@@ -45,6 +45,14 @@ const readiness = (req, res, next) => {
 	}
 };
 
+const liveness = (_req, res) => {
+	return sendSuccess(res, 200, "Liveness check passed", {
+		status: "alive",
+		timestamp: new Date().toISOString(),
+		uptime: Math.round(process.uptime()),
+	});
+};
+
 const getMongooseState = (state) => {
 	const states = {
 		0: "disconnected",
@@ -58,4 +66,5 @@ const getMongooseState = (state) => {
 module.exports = {
 	check,
 	readiness,
+	liveness,
 };
