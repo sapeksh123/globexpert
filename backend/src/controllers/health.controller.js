@@ -9,6 +9,7 @@ const check = (req, res, next) => {
 		const uptime = process.uptime();
 
 		const healthStatus = {
+			service: "globexpert-api",
 			status: "ok",
 			timestamp,
 			uptime: Math.round(uptime),
@@ -33,6 +34,7 @@ const readiness = (req, res, next) => {
 		const status = dbConnected ? "ready" : "not_ready";
 
 		return sendSuccess(res, statusCode, "Readiness check completed", {
+			service: "globexpert-api",
 			status,
 			timestamp: new Date().toISOString(),
 			database: {
@@ -47,6 +49,7 @@ const readiness = (req, res, next) => {
 
 const liveness = (_req, res) => {
 	return sendSuccess(res, 200, "Liveness check passed", {
+		service: "globexpert-api",
 		status: "alive",
 		timestamp: new Date().toISOString(),
 		uptime: Math.round(process.uptime()),
