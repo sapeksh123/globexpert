@@ -2,8 +2,14 @@ const mongoose = require("mongoose");
 const { sendSuccess } = require("../utils/response");
 const { version } = require("../../package.json");
 
+const setHealthHeaders = (res) => {
+	res.set("Cache-Control", "no-store");
+	res.set("Pragma", "no-cache");
+};
+
 const check = (req, res, next) => {
 	try {
+		setHealthHeaders(res);
 		const dbConnected = mongoose.connection.readyState === 1;
 		const timestamp = new Date().toISOString();
 		const uptime = process.uptime();
