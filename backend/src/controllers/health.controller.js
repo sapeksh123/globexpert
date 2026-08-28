@@ -19,6 +19,7 @@ const check = (req, res, next) => {
 			status: "ok",
 			timestamp,
 			uptime: Math.round(uptime),
+			startedAt: new Date(Date.now() - process.uptime() * 1000).toISOString(),
 			environment: process.env.NODE_ENV || "development",
 			version,
 			database: {
