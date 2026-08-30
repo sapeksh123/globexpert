@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { sendSuccess } = require("../utils/response");
 const { version } = require("../../package.json");
+const startedAt = new Date(Date.now() - process.uptime() * 1000).toISOString();
 
 const setHealthHeaders = (res) => {
 	res.set("Cache-Control", "no-store");
@@ -19,7 +20,7 @@ const check = (req, res, next) => {
 			status: "ok",
 			timestamp,
 			uptime: Math.round(uptime),
-			startedAt: new Date(Date.now() - process.uptime() * 1000).toISOString(),
+			startedAt,
 			environment: process.env.NODE_ENV || "development",
 			version,
 			database: {
@@ -36,6 +37,7 @@ const check = (req, res, next) => {
 
 const readiness = (req, res, next) => {
 	try {
+		setHealthHeaders(res);
 		const dbConnected = mongoose.connection.readyState === 1;
 		const statusCode = dbConnected ? 200 : 503;
 		const status = dbConnected ? "ready" : "not_ready";
@@ -43,6 +45,7 @@ const readiness = (req, res, next) => {
 		return sendSuccess(res, statusCode, "Readiness check completed", {
 			service: "globexpert-api",
 			status,
+			startedAt,
 			timestamp: new Date().toISOString(),
 			database: {
 				connected: dbConnected,
@@ -55,10 +58,13 @@ const readiness = (req, res, next) => {
 };
 
 const liveness = (_req, res) => {
+	setHealthHeaders(res);
+
 	return sendSuccess(res, 200, "Liveness check passed", {
 		service: "globexpert-api",
 		status: "alive",
 		timestamp: new Date().toISOString(),
+		startedAt,
 		uptime: Math.round(process.uptime()),
 	});
 };
