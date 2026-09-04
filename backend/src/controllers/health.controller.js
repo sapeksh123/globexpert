@@ -46,6 +46,7 @@ const readiness = (req, res, next) => {
 			service: "globexpert-api",
 			status,
 			startedAt,
+			uptime: Math.round(process.uptime()),
 			timestamp: new Date().toISOString(),
 			database: {
 				connected: dbConnected,
