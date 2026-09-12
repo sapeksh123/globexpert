@@ -67,6 +67,7 @@ const liveness = (_req, res) => {
 		timestamp: new Date().toISOString(),
 		startedAt,
 		uptime: Math.round(process.uptime()),
+		version,
 	});
 };
 
