@@ -34,6 +34,7 @@ const check = (req, res, next) => {
 			environment: process.env.NODE_ENV || "development",
 			version,
 			node: process.version,
+			requestId: req.requestId,
 			database: {
 				connected: dbConnected,
 				state: getMongooseState(mongoose.connection.readyState),
@@ -59,6 +60,7 @@ const readiness = (req, res, next) => {
 			version,
 			node: process.version,
 			environment: process.env.NODE_ENV || "development",
+			requestId: req.requestId,
 			startedAt,
 			uptime: Math.round(process.uptime()),
 			memory: getMemoryUsage(),
@@ -73,7 +75,7 @@ const readiness = (req, res, next) => {
 	}
 };
 
-const liveness = (_req, res) => {
+const liveness = (req, res) => {
 	setHealthHeaders(res);
 
 	return sendSuccess(res, 200, "Liveness check passed", {
@@ -86,6 +88,7 @@ const liveness = (_req, res) => {
 		version,
 		node: process.version,
 		environment: process.env.NODE_ENV || "development",
+		requestId: req.requestId,
 	});
 };
 
