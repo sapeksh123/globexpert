@@ -9,7 +9,7 @@ const requestLogger = (req, res, next) => {
 		const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
 		const responseLength = res.getHeader("content-length") || "-";
 		logger.info(
-			`${req.requestId} ${req.method} ${req.originalUrl} ${res.statusCode} ${responseLength}b ${durationMs.toFixed(1)}ms`,
+			`${req.requestId} ${req.method} ${req.path} ${res.statusCode} ${responseLength}b ${durationMs.toFixed(1)}ms`,
 		);
 	});
 
@@ -17,7 +17,7 @@ const requestLogger = (req, res, next) => {
 		if (completed) return;
 		const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
 		logger.warn(
-			`${req.requestId} ${req.method} ${req.originalUrl} aborted ${durationMs.toFixed(1)}ms`,
+			`${req.requestId} ${req.method} ${req.path} aborted ${durationMs.toFixed(1)}ms`,
 		);
 	});
 
