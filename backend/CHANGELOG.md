@@ -36,3 +36,4 @@ Mar 30 commit
 June 9 development work
 Added a database-aware readiness endpoint at GET /api/health/ready.
 Added a database-independent liveness endpoint at GET /api/health/live and service metadata to health responses.
+Health responses now disable caching and include consistent startup, uptime, and version metadata.
