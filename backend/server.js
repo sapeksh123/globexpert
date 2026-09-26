@@ -17,6 +17,10 @@ const startServer = async () => {
     );
   });
 
+  server.on("error", (error) => {
+    logger.error("HTTP server error", error);
+  });
+
   let isShuttingDown = false;
   const shutdown = async (signal) => {
     if (isShuttingDown) return;

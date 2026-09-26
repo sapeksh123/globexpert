@@ -46,3 +46,4 @@ October 13: added Node and process metadata to the root API status response.
 October 14: included the process ID in the startup log for operational tracing.
 September 13: included request correlation IDs in all health probe responses.
 September 17: omitted query strings from request logs to reduce accidental secret exposure.
+September 26: captured HTTP server errors through the backend logger.
