@@ -34,9 +34,14 @@ const startServer = async () => {
 
     server.close(async () => {
       clearTimeout(forceExit);
-      await mongoose.disconnect();
-      logger.info("Server shut down cleanly");
-      process.exit(0);
+      try {
+        await mongoose.disconnect();
+        logger.info("Server shut down cleanly");
+        process.exit(0);
+      } catch (error) {
+        logger.error("Failed to disconnect from MongoDB during shutdown", error);
+        process.exit(1);
+      }
     });
   };
 
