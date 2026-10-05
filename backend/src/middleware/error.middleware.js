@@ -16,7 +16,7 @@ const resolveStatusCode = (error) => {
 	return 500;
 };
 
-const errorHandler = (error, _req, res, _next) => {
+const errorHandler = (error, req, res, _next) => {
 	const statusCode = resolveStatusCode(error);
 	const message = error.name === "CastError"
 		? "Invalid id"
@@ -34,6 +34,7 @@ const errorHandler = (error, _req, res, _next) => {
 		success: false,
 		message,
 		errors: error.errors || [],
+		requestId: req.requestId,
 	};
 
 	if (process.env.NODE_ENV !== "production" && statusCode >= 500) {
