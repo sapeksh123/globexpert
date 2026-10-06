@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const { version } = require("../package.json");
 
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
@@ -26,6 +27,8 @@ app.get("/", (_req, res) => {
 	res.status(200).json({
 		success: true,
 		message: "Globexpert API is running",
+		version,
+		requestId: req.requestId,
 		timestamp: new Date().toISOString(),
 	});
 });
