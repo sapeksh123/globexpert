@@ -8,6 +8,15 @@ const setHealthHeaders = (res) => {
 	res.set("Pragma", "no-cache");
 };
 
+const getMemoryUsage = () => {
+	const memory = process.memoryUsage();
+	return {
+		heapUsedMb: Math.round(memory.heapUsed / 1024 / 1024),
+		heapTotalMb: Math.round(memory.heapTotal / 1024 / 1024),
+		rssMb: Math.round(memory.rss / 1024 / 1024),
+	};
+};
+
 const check = (req, res, next) => {
 	try {
 		setHealthHeaders(res);
@@ -21,6 +30,7 @@ const check = (req, res, next) => {
 			timestamp,
 			uptime: Math.round(uptime),
 			startedAt,
+			memory: getMemoryUsage(),
 			environment: process.env.NODE_ENV || "development",
 			version,
 			database: {
