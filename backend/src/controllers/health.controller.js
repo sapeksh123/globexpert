@@ -57,6 +57,7 @@ const readiness = (req, res, next) => {
 			status,
 			startedAt,
 			uptime: Math.round(process.uptime()),
+			memory: getMemoryUsage(),
 			timestamp: new Date().toISOString(),
 			database: {
 				connected: dbConnected,
@@ -77,6 +78,7 @@ const liveness = (_req, res) => {
 		timestamp: new Date().toISOString(),
 		startedAt,
 		uptime: Math.round(process.uptime()),
+		memory: getMemoryUsage(),
 		version,
 	});
 };
