@@ -7,8 +7,9 @@ const requestLogger = (req, res, next) => {
 	res.on("finish", () => {
 		completed = true;
 		const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+		const responseLength = res.getHeader("content-length") || "-";
 		logger.info(
-			`${req.requestId} ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs.toFixed(1)}ms`,
+			`${req.requestId} ${req.method} ${req.originalUrl} ${res.statusCode} ${responseLength}b ${durationMs.toFixed(1)}ms`,
 		);
 	});
 
