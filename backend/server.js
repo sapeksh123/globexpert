@@ -16,7 +16,14 @@ const startServer = async () => {
 
   const shutdown = async (signal) => {
     logger.info(`${signal} received, shutting down server`);
+    const forceExit = setTimeout(() => {
+      logger.error("Forced shutdown after waiting for open connections");
+      process.exit(1);
+    }, 10000);
+    forceExit.unref();
+
     server.close(async () => {
+      clearTimeout(forceExit);
       await mongoose.disconnect();
       logger.info("Server shut down cleanly");
       process.exit(0);
