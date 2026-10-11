@@ -33,6 +33,7 @@ const check = (req, res, next) => {
 			memory: getMemoryUsage(),
 			environment: process.env.NODE_ENV || "development",
 			version,
+			node: process.version,
 			database: {
 				connected: dbConnected,
 				state: getMongooseState(mongoose.connection.readyState),
