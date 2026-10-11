@@ -40,3 +40,4 @@ Health responses now disable caching and include consistent startup, uptime, and
 Added request IDs, timing logs, bounded request bodies, graceful shutdown protection, and runtime health metrics.
 October 9: rejected unsafe request ID header values before echoing them.
 October 10: included response size in completed request logs when available.
+October 11: exposed the resolved HTTP status in structured error responses.

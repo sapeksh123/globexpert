@@ -32,6 +32,7 @@ const errorHandler = (error, req, res, _next) => {
 
 	const payload = {
 		success: false,
+		statusCode,
 		message,
 		errors: error.errors || [],
 		requestId: req.requestId,
