@@ -57,6 +57,8 @@ const readiness = (req, res, next) => {
 			service: "globexpert-api",
 			status,
 			version,
+			node: process.version,
+			environment: process.env.NODE_ENV || "development",
 			startedAt,
 			uptime: Math.round(process.uptime()),
 			memory: getMemoryUsage(),
