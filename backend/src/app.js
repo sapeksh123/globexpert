@@ -34,6 +34,8 @@ app.get("/", (req, res) => {
 		success: true,
 		message: "Globexpert API is running",
 		version,
+		node: process.version,
+		pid: process.pid,
 		requestId: req.requestId,
 		timestamp: new Date().toISOString(),
 	});

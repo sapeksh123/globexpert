@@ -42,3 +42,4 @@ October 9: rejected unsafe request ID header values before echoing them.
 October 10: included response size in completed request logs when available.
 October 11: exposed the resolved HTTP status in structured error responses.
 October 12: aligned readiness metadata with the main health response.
+October 13: added Node and process metadata to the root API status response.
