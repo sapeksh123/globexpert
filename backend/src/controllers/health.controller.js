@@ -56,6 +56,7 @@ const readiness = (req, res, next) => {
 		return sendSuccess(res, statusCode, "Readiness check completed", {
 			service: "globexpert-api",
 			status,
+			version,
 			startedAt,
 			uptime: Math.round(process.uptime()),
 			memory: getMemoryUsage(),
