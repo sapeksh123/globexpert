@@ -12,7 +12,9 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   await connectDB();
   const server = app.listen(PORT, () => {
-    logger.info(`Globexpert API v${version} running on http://localhost:${PORT}`);
+    logger.info(
+      `Globexpert API v${version} running on http://localhost:${PORT} (pid ${process.pid})`,
+    );
   });
 
   let isShuttingDown = false;

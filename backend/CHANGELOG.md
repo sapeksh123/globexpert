@@ -43,3 +43,4 @@ October 10: included response size in completed request logs when available.
 October 11: exposed the resolved HTTP status in structured error responses.
 October 12: aligned readiness metadata with the main health response.
 October 13: added Node and process metadata to the root API status response.
+October 14: included the process ID in the startup log for operational tracing.
