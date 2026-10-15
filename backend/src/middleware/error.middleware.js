@@ -8,6 +8,8 @@ const notFound = (req, _res, next) => {
 
 const resolveStatusCode = (error) => {
 	if (error.statusCode) return error.statusCode;
+	if (error.type === "entity.too.large") return 413;
+	if (error.type === "entity.parse.failed") return 400;
 	if (error.name === "CastError" || error.name === "ValidationError") return 400;
 	if (error.name === "MulterError") return 400;
 	if (error.code === 11000) return 409;
@@ -16,8 +18,13 @@ const resolveStatusCode = (error) => {
 
 const errorHandler = (error, _req, res, _next) => {
 	const statusCode = resolveStatusCode(error);
-	const message =
-		error.name === "CastError" ? "Invalid id" : error.message || "Something went wrong";
+	const message = error.name === "CastError"
+		? "Invalid id"
+		: error.type === "entity.too.large"
+			? "Request body is too large"
+			: error.type === "entity.parse.failed"
+				? "Invalid request body"
+				: error.message || "Something went wrong";
 
 	if (statusCode >= 500) {
 		logger.error("Unhandled server error", error);
