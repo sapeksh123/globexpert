@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { sendSuccess } = require("../utils/response");
 
-const check = async (req, res, next) => {
+const check = (req, res, next) => {
 	try {
 		const dbConnected = mongoose.connection.readyState === 1;
 		const timestamp = new Date().toISOString();
@@ -10,7 +10,8 @@ const check = async (req, res, next) => {
 		const healthStatus = {
 			status: "ok",
 			timestamp,
-			uptime,
+			uptime: Math.round(uptime),
+			environment: process.env.NODE_ENV || "development",
 			database: {
 				connected: dbConnected,
 				state: getMongooseState(mongoose.connection.readyState),

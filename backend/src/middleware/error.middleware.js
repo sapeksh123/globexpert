@@ -23,11 +23,17 @@ const errorHandler = (error, _req, res, _next) => {
 		logger.error("Unhandled server error", error);
 	}
 
-	res.status(statusCode).json({
+	const payload = {
 		success: false,
 		message,
 		errors: error.errors || [],
-	});
+	};
+
+	if (process.env.NODE_ENV !== "production" && statusCode >= 500) {
+		payload.stack = error.stack;
+	}
+
+	res.status(statusCode).json(payload);
 };
 
 module.exports = {
