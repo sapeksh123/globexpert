@@ -6,9 +6,18 @@ const notFound = (req, _res, next) => {
 	next(error);
 };
 
+const resolveStatusCode = (error) => {
+	if (error.statusCode) return error.statusCode;
+	if (error.name === "CastError" || error.name === "ValidationError") return 400;
+	if (error.name === "MulterError") return 400;
+	if (error.code === 11000) return 409;
+	return 500;
+};
+
 const errorHandler = (error, _req, res, _next) => {
-	const statusCode = error.statusCode || 500;
-	const message = error.message || "Something went wrong";
+	const statusCode = resolveStatusCode(error);
+	const message =
+		error.name === "CastError" ? "Invalid id" : error.message || "Something went wrong";
 
 	if (statusCode >= 500) {
 		logger.error("Unhandled server error", error);
