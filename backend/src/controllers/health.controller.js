@@ -26,6 +26,24 @@ const check = (req, res, next) => {
 	}
 };
 
+const readiness = (req, res, next) => {
+	try {
+		const dbConnected = mongoose.connection.readyState === 1;
+		const statusCode = dbConnected ? 200 : 503;
+		const status = dbConnected ? "ready" : "not_ready";
+
+		return sendSuccess(res, statusCode, "Readiness check completed", {
+			status,
+			database: {
+				connected: dbConnected,
+				state: getMongooseState(mongoose.connection.readyState),
+			},
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 const getMongooseState = (state) => {
 	const states = {
 		0: "disconnected",
@@ -38,4 +56,5 @@ const getMongooseState = (state) => {
 
 module.exports = {
 	check,
+	readiness,
 };
