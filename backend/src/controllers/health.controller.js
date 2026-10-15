@@ -82,6 +82,8 @@ const liveness = (_req, res) => {
 		uptime: Math.round(process.uptime()),
 		memory: getMemoryUsage(),
 		version,
+		node: process.version,
+		environment: process.env.NODE_ENV || "development",
 	});
 };
 
