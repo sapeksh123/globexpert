@@ -21,6 +21,7 @@ Multi-platform marketplace connecting sellers with customers for products and se
 # Backend
 cd backend
 npm install
+cp .env.example .env   # set MONGODB_URI and JWT_SECRET
 npm run seed
 npm run dev
 

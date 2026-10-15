@@ -623,6 +623,7 @@ Update order status (Seller/Admin only).
 ```javascript
 {
   userId: "user_id",
+  email: "user@example.com",
   role: "USER|SELLER|ADMIN",
   iat: timestamp,
   exp: timestamp
@@ -799,7 +800,6 @@ Web app runs on `http://localhost:5173`
 ```env
 # Server
 PORT=5000
-NODE_ENV=development
 
 # Database
 MONGODB_URI=mongodb://localhost:27017/globexpert
