@@ -1,21 +1,13 @@
 const ProductService = require("../services/product.service");
 const { sendSuccess } = require("../utils/response");
 const { uploadImageBuffer } = require("../utils/cloudinary");
-const { validateCatalogPayload } = require("../validators/product.validator");
+const { normalizeCatalogBody, validateCatalogPayload } = require("../validators/product.validator");
 
 const ENTITY = "product";
 
 const createProduct = async (req, res, next) => {
 	try {
-		if (req.body.price !== undefined) {
-			req.body.price = Number(req.body.price);
-		}
-		if (req.body.stock !== undefined) {
-			req.body.stock = Number(req.body.stock);
-		}
-		if (req.body.isActive !== undefined) {
-			req.body.isActive = req.body.isActive === "true";
-		}
+		normalizeCatalogBody(req.body, ["price", "stock"]);
 
 		const errors = validateCatalogPayload(req.body, { requireStock: true });
 		if (errors.length > 0) {
@@ -55,15 +47,7 @@ const getProductById = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
 	try {
-		if (req.body.price !== undefined) {
-			req.body.price = Number(req.body.price);
-		}
-		if (req.body.stock !== undefined) {
-			req.body.stock = Number(req.body.stock);
-		}
-		if (req.body.isActive !== undefined) {
-			req.body.isActive = req.body.isActive === "true";
-		}
+		normalizeCatalogBody(req.body, ["price", "stock"]);
 
 		const errors = validateCatalogPayload(req.body, { requireStock: true, partial: true });
 		if (errors.length > 0) {

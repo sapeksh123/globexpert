@@ -1,21 +1,13 @@
 const ProductService = require("../services/product.service");
 const { sendSuccess } = require("../utils/response");
 const { uploadImageBuffer } = require("../utils/cloudinary");
-const { validateCatalogPayload } = require("../validators/product.validator");
+const { normalizeCatalogBody, validateCatalogPayload } = require("../validators/product.validator");
 
 const ENTITY = "service";
 
 const createService = async (req, res, next) => {
   try {
-    if (req.body.price !== undefined) {
-      req.body.price = Number(req.body.price);
-    }
-    if (req.body.durationMinutes !== undefined) {
-      req.body.durationMinutes = Number(req.body.durationMinutes);
-    }
-    if (req.body.isActive !== undefined) {
-      req.body.isActive = req.body.isActive === "true";
-    }
+    normalizeCatalogBody(req.body, ["price", "durationMinutes"]);
 
     const errors = validateCatalogPayload(req.body, { requireStock: false });
     if (errors.length > 0) {
@@ -55,15 +47,7 @@ const getServiceById = async (req, res, next) => {
 
 const updateService = async (req, res, next) => {
   try {
-    if (req.body.price !== undefined) {
-      req.body.price = Number(req.body.price);
-    }
-    if (req.body.durationMinutes !== undefined) {
-      req.body.durationMinutes = Number(req.body.durationMinutes);
-    }
-    if (req.body.isActive !== undefined) {
-      req.body.isActive = req.body.isActive === "true";
-    }
+    normalizeCatalogBody(req.body, ["price", "durationMinutes"]);
 
     const errors = validateCatalogPayload(req.body, { requireStock: false, partial: true });
     if (errors.length > 0) {

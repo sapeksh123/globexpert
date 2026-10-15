@@ -1,3 +1,15 @@
+const normalizeCatalogBody = (body, numericFields = []) => {
+	numericFields.forEach((field) => {
+		if (body[field] !== undefined) {
+			body[field] = Number(body[field]);
+		}
+	});
+	if (body.isActive !== undefined) {
+		body.isActive = body.isActive === true || body.isActive === "true";
+	}
+	return body;
+};
+
 const validateCatalogPayload = (payload, options = {}) => {
 	const { requireStock = true, partial = false } = options;
 	const errors = [];
