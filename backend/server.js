@@ -15,7 +15,10 @@ const startServer = async () => {
     logger.info(`Globexpert API v${version} running on http://localhost:${PORT}`);
   });
 
+  let isShuttingDown = false;
   const shutdown = async (signal) => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
     logger.info(`${signal} received, shutting down server`);
     const forceExit = setTimeout(() => {
       logger.error("Forced shutdown after waiting for open connections");
