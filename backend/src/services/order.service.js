@@ -47,7 +47,7 @@ const createOrder = async (userId, payload) => {
 		throw error;
 	}
 
-	if (!payload.deliveryAddress || payload.deliveryAddress.trim().length < 5) {
+	if (typeof payload.deliveryAddress !== "string" || payload.deliveryAddress.trim().length < 5) {
 		const error = new Error("Valid deliveryAddress is required");
 		error.statusCode = 400;
 		throw error;
@@ -58,9 +58,9 @@ const createOrder = async (userId, payload) => {
 	let sellerId = null;
 
 	for (const row of payload.items) {
-		const quantity = Number(row.quantity) || 1;
-		if (quantity < 1) {
-			const error = new Error("Quantity must be at least 1");
+		const quantity = row.quantity === undefined ? 1 : Number(row.quantity);
+		if (!Number.isInteger(quantity) || quantity < 1) {
+			const error = new Error("Quantity must be a whole number of at least 1");
 			error.statusCode = 400;
 			throw error;
 		}
